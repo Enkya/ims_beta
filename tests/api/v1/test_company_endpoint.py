@@ -8,7 +8,18 @@ class TestCompanyEndpoint(BaseCase):
     ''' A class to test the company endpoints '''
     def setUp(self):
         super(TestCompanyEndpoint, self).setUp()
-        self.company_data = {'name': 'Eat Sushi'}
+        self.company_data = {
+            "name": "MOVERS",
+            "district": "Lugogo",
+            "postal": "2787",
+            "country": "Uganda",
+            "techPersonName": "test",
+            "techPersonEmail": "test@gmail.com",
+            "address1": "Ggombe B, Wakiso",
+            "address2": "",
+            "legalPersonName": "Bruce Bigirwenkya",
+            "legalPersonEmail": "test@gmail.com"
+        }
 
     def test_post_companies_adds_new_company(self):
         with self.app.app_context():
