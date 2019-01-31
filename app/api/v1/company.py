@@ -90,15 +90,15 @@ class CompaniesEndPoint(Resource):
         ''' Create a company '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
-        location = arguments.get('district').strip()
-        postal = int(arguments.get('postal').strip())
-        country = arguments.get('country').strip()
-        tech_person_name = arguments.get('techPersonName').strip()
-        tech_person_email = arguments.get('techPersonEmail').strip()
-        address_line_1 = arguments.get('address1').strip()
-        address_line_2 = arguments.get('address1').strip()
-        legal_person_name = arguments.get('legalPersonName').strip()
-        legal_person_email = arguments.get('legalPersonEmail').strip()
+        location = arguments.get('district').strip() or ''
+        postal = arguments.get('postal').strip() or ''
+        country = arguments.get('country').strip() or ''
+        tech_person_name = arguments.get('techPersonName').strip() or ''
+        tech_person_email = arguments.get('techPersonEmail').strip() or ''
+        address_line_1 = arguments.get('address1').strip() or ''
+        address_line_2 = arguments.get('address1').strip() or ''
+        legal_person_name = arguments.get('legalPersonName').strip() or ''
+        legal_person_email = arguments.get('legalPersonEmail').strip() or ''
 
         if not name:
             return abort(400, 'Name cannot be empty!')
@@ -119,7 +119,7 @@ class CompaniesEndPoint(Resource):
                 return {'message': 'Company created successfully!'}, 201
             return abort(409, message='Company already exists!')
         except Exception as e:
-            abort(400, message='Failed to create new company -> {}'.format(e.message))
+            abort(400, message='Failed to create new company -> {}'.format(e))
 
 
 @company_api.route('/<int:company_id>', endpoint='single_company')
