@@ -1,4 +1,4 @@
-# Bucketlist API
+# IMS API
 
 [![Build Status](https://travis-ci.org/Enkya/ims_beta.svg?branch=master)](https://travis-ci.org/Enkya/ims_beta)
 [![Coverage Status](https://coveralls.io/repos/github/Elbertbiggs360/buckelist-api/badge.svg?branch=master)](https://coveralls.io/github/Elbertbiggs360/buckelist-api?branch=master)
@@ -38,7 +38,7 @@ You can test the API demo hosted at https://ims-api.herokuapp.com in Postman
 
 #### How to run the engine
 * Clone the application: *git clone git@github.com:Enkya/ims_beta.git*
-* cd into the bucketlist-api: `cd ims_beta`
+* cd into the ims-api: `cd ims_beta`
 * Run `python install -r requirements.txt`
 * Create database
 * Initialize, migrate, and upgrade the database:
