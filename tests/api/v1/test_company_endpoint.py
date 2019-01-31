@@ -1,45 +1,45 @@
 import json
 
 from tests.base_test import BaseCase
-from app.models.bucketlist import Bucketlist
+from app.models.company import Company
 
 
-class TestBucketlistEndpoint(BaseCase):
-    ''' A class to test the bucketlist endpoints '''
+class TestCompanyEndpoint(BaseCase):
+    ''' A class to test the company endpoints '''
     def setUp(self):
-        super(TestBucketlistEndpoint, self).setUp()
-        self.bucketlist_data = {'name': 'Eat Sushi'}
+        super(TestCompanyEndpoint, self).setUp()
+        self.company_data = {'name': 'Eat Sushi'}
 
-    def test_post_bucketlists_adds_new_bucketlist(self):
+    def test_post_companies_adds_new_company(self):
         with self.app.app_context():
             response = self.client().post(
-                '/api/v1/bucketlists',
-                data=json.dumps(self.bucketlist_data),
+                '/api/v1/companies',
+                data=json.dumps(self.company_data),
                 headers=self.auth_headers())
         self.assertEqual(response.status_code, 201)
-        self.assertEqual('Bucketlist created successfully!',
+        self.assertEqual('Company created successfully!',
                          json.loads(response.data.decode('utf-8')).get('message'))
 
-    def test_get_returns_all_bucketlists_for_user(self):
+    def test_get_returns_all_companies_for_user(self):
         with self.app.app_context():
-            response = self.client().get('/api/v1/bucketlists',
+            response = self.client().get('/api/v1/companies',
                                          headers=self.auth_headers())
             result = response.data.decode('utf-8')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json.loads(result)), 6)
 
-    def test_get_returns_one_bucketlist_if_id_is_specified(self):
+    def test_get_returns_one_company_if_id_is_specified(self):
         with self.app.app_context():
-            response = self.client().get('/api/v1/bucketlists/1',
+            response = self.client().get('/api/v1/companies/1',
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
-        expected_list = sorted(['id', 'name', 'date_created', 'date_modified', 'created_by', 'items'])
+        expected_list = sorted(['id', 'name', 'date_created', 'date_modified'])
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual([result.get('name'), result.get('created_by')], ['sample_1', 1])
+        self.assertListEqual([result.get('name')], ['sample_1'])
 
-    def test_edit_updates_bucketlist_fields(self):
+    def test_edit_updates_company_fields(self):
         with self.app.app_context():
-            response = self.client().get('/api/v1/bucketlists/1',
+            response = self.client().get('/api/v1/companies/1',
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
 
@@ -47,37 +47,37 @@ class TestBucketlistEndpoint(BaseCase):
 
         update_fields = {'name': 'Bungee Jump'}
         with self.app.app_context():
-            response = self.client().put('/api/v1/bucketlists/1',
+            response = self.client().put('/api/v1/companies/1',
                                          data=json.dumps(update_fields),
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result.get('name'), update_fields.get('name'))
 
-    def test_delete_removes_bucketlist_from_database(self):
+    def test_delete_removes_company_from_database(self):
         with self.app.app_context():
 
-            self.assertEqual(len(Bucketlist.query.filter_by(active=True).all()), 2)
+            self.assertEqual(len(Company.query.filter_by(active=True).all()), 2)
 
-            response = self.client().delete('/api/v1/bucketlists/1',
+            response = self.client().delete('/api/v1/companies/1',
                                             headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(result.get('message'), 'Bucketlist with id 1 successfully deleted.')
+        self.assertEqual(result.get('message'), 'Company with id 1 successfully deleted.')
         with self.app.app_context():
-            self.assertEqual(len(Bucketlist.query.filter_by(active=True).all()), 1)
+            self.assertEqual(len(Company.query.filter_by(active=True).all()), 1)
 
-    def test_search_returns_bucketlists_whose_name_matches_a_search_term(self):
+    def test_search_returns_companies_whose_name_matches_a_search_term(self):
         with self.app.app_context():
-            response = self.client().get('/api/v1/bucketlists?q=sample',
+            response = self.client().get('/api/v1/companies?q=sample',
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8')).get('data')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(result), 2)
 
-    def test_pagination_of_bucketlists_when_you_pass_a_limit_parameter(self):
+    def test_pagination_of_companies_when_you_pass_a_limit_parameter(self):
         with self.app.app_context():
-            response = self.client().get('/api/v1/bucketlists?limit=1',
+            response = self.client().get('/api/v1/companies?limit=1',
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
 

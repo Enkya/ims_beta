@@ -18,8 +18,8 @@ user_fields = user_api.model(
             required=True, description='User last name', example='lName'),
         'email': fields.String(
             required=True, description='User email', example='lname@test.com'),
-        'bucketlists_url': fields.Url(
-            'api.bucketlist', absolute=True),
+        'companies_url': fields.Url(
+            'api.company', absolute=True),
     })
 
 @user_api.route('', endpoint='users')
@@ -27,7 +27,6 @@ class UsersList(Resource):
     @user_api.response(200, 'User details fetched successfully!')
     @user_api.response(404, 'User not found')
     @user_api.doc(model='User', body=user_fields)
-    @auth.login_required
     @user_api.marshal_with(user_fields)
     def get(self):
         ''' Method to retrieve all users '''
@@ -41,7 +40,6 @@ class UsersList(Resource):
 @user_api.route('/<user_id>', endpoint='single_user')
 class UserEndpoint(Resource):
     ''' Class for User Details '''
-    @auth.login_required
     @user_api.header('x-access-token', 'Access Token', required=True)
     @user_api.marshal_with(user_fields)
     def get(self, user_id):
@@ -49,7 +47,6 @@ class UserEndpoint(Resource):
         user = User.query.filter_by(id=user_id, active=True).first()
         return user, 200 if user else abort(404, message='User with ID {} not found.'.format(user_id))
 
-    @auth.login_required
     def delete(self, user_id):
         ''' A method to delete a user '''
         user = User.query.get(user_id)

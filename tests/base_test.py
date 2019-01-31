@@ -4,8 +4,7 @@ import json
 from app import create_app
 from app.models.baseModel import db
 from app.models.user import User
-from app.models.bucketlist import Bucketlist
-from app.models.item import Item
+from app.models.company import Company
 
 
 class BaseCase(unittest.TestCase):
@@ -20,8 +19,7 @@ class BaseCase(unittest.TestCase):
         self.client = self.app.test_client
         self._password = 'test'
 
-        self.bucketlist_data = {'name': 'Go fishing'}
-        self.item_data = {'name': 'Gokarting'}
+        self.company_data = {'name': 'Go fishing'}
 
         with self.app.app_context():
             db.session.close()
@@ -44,8 +42,7 @@ class BaseCase(unittest.TestCase):
 
     def populate_db(self):
         self.add_test_users()
-        self.add_test_bucketlists()
-        self.add_test_items()
+        self.add_test_companies()
 
     def add_test_users(self):
         ''' method to add test users to db '''
@@ -53,20 +50,11 @@ class BaseCase(unittest.TestCase):
         self.user_2.save_user()
 
     @staticmethod
-    def add_test_bucketlists():
-        ''' method to add test bucketlists to db '''
-        user = User.query.filter_by(email='emugaya@andela.com', active=True).first()
-        bucketlist_1 = Bucketlist(user_id=user.id, name='sample_1')
-        bucketlist_2 = Bucketlist(user_id=user.id, name='sample_2')
-        bucketlist_1.save(), bucketlist_2.save()
-
-    @staticmethod
-    def add_test_items():
-        ''' method to add test items to bucketlist '''
-        bucketlist = Bucketlist.query.filter_by(name='sample_1', active=True).first()
-        item_1 = Item(name='Mombasa', bucketlist_id=bucketlist.id)
-        item_2 = Item(name='kampala', bucketlist_id=bucketlist.id)
-        item_1.save(), item_2.save()
+    def add_test_companies():
+        ''' method to add test companies to db '''
+        company_1 = Company(name='sample_1')
+        company_2 = Company(name='sample_2')
+        company_1.save(), company_2.save()
 
     def auth_headers(self, email='emugaya@andela.com', password='test'):
         ''' method generates auth headers for test user '''
