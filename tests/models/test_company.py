@@ -18,8 +18,9 @@ class TestCompanyModel(BaseCase):
         self.assertTrue(isinstance(company.date_modified, datetime))
 
     def test_add_company(self):
-        company = Company(name='Go hard or go home')
-        check = company.save_company()
+        with self.app.app_context():
+            company = Company(name='Go hard or go home')
+            check = company.save_company()
         self.assertTrue(check, "Company should be added")
 
     def test_delete_company(self):
