@@ -6,7 +6,16 @@ class Company(BaseModel):
 
     __table__name = 'company'
 
-    name = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=False, unique=True)
+    location = db.Column(db.String(120))
+    postal = db.Column(db.Integer)
+    country = db.Column(db.String(255))
+    tech_person_name = db.Column(db.String(255))
+    tech_person_email = db.Column(db.String(255))
+    address_line_1 = db.Column(db.String(255))
+    address_line_2 = db.Column(db.String(255))
+    legal_person_name = db.Column(db.String(255))
+    legal_person_email = db.Column(db.String(255))
 
 
     def save_company(self):

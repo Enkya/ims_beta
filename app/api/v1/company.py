@@ -19,6 +19,15 @@ company_fields = company_api.model(
             required=True,
             description="Company name",
             example="test_company"),
+        'location': fields.String(required=False, attribute='location'),
+        'postal': fields.String(required=False, attribute='postal'),
+        'country': fields.String(required=False, attribute='country'),
+        'tech_person_name': fields.String(required=False, attribute='tech_person_name'),
+        'tech_person_email': fields.String(required=False, attribute='tech_person_email'),
+        'address_line_1': fields.String(required=False, attribute='address_line_1'),
+        'address_line_2': fields.String(required=False, attribute='address_line_2'),
+        'legal_person_name': fields.String(required=False, attribute='legal_person_name'),
+        'legal_person_email': fields.String(required=False, attribute='legal_person_email'),
         'date_created': fields.DateTime(required=False, attribute='date_created'),
         'date_modified': fields.DateTime(required=False, attribute='date_modified'),
     }
@@ -81,10 +90,31 @@ class CompaniesEndPoint(Resource):
         ''' Create a company '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
+        location = arguments.get('district').strip()
+        postal = int(arguments.get('postal').strip())
+        country = arguments.get('country').strip()
+        tech_person_name = arguments.get('techPersonName').strip()
+        tech_person_email = arguments.get('techPersonEmail').strip()
+        address_line_1 = arguments.get('address1').strip()
+        address_line_2 = arguments.get('address1').strip()
+        legal_person_name = arguments.get('legalPersonName').strip()
+        legal_person_email = arguments.get('legalPersonEmail').strip()
+
         if not name:
-            return abort(400, 'Name cannot be empty!')        
+            return abort(400, 'Name cannot be empty!')
         try:
-            company = Company(name=name)
+            company = Company(
+                name=name,
+                location=location,
+                postal=postal,
+                country=country,
+                tech_person_name=tech_person_name,
+                tech_person_email=tech_person_email,
+                address_line_1=address_line_1,
+                address_line_2=address_line_2,
+                legal_person_name=legal_person_name,
+                legal_person_email=legal_person_email
+                )
             if company.save_company():
                 return {'message': 'Company created successfully!'}, 201
             return abort(409, message='Company already exists!')

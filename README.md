@@ -7,7 +7,7 @@
 
 ## Demo
 
-You can test the API demo hosted at https://ims-api.herokuapp.com in Postman
+You can test the API demo hosted at https://shiftk3yapi.herokuapp.com in Postman
 
 ##Usage
 
