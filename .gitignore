@@ -11,3 +11,4 @@
 *.vscode*
 .coverage
 .env
+*.json

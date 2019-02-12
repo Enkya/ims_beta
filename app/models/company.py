@@ -1,5 +1,5 @@
 from app.models.baseModel import BaseModel, db
-
+from sqlalchemy.orm import relationship
 
 class Company(BaseModel):
     '''This class represents the company model'''
@@ -7,16 +7,15 @@ class Company(BaseModel):
     __table__name = 'company'
 
     name = db.Column(db.String(255), nullable=False, unique=True)
-    location = db.Column(db.String(120))
+    address_id = db.Column(db.String(120), db.ForeignKey("address.id"))
     postal = db.Column(db.Integer)
     country = db.Column(db.String(255))
-    tech_person_name = db.Column(db.String(255))
-    tech_person_email = db.Column(db.String(255))
-    address_line_1 = db.Column(db.String(255))
-    address_line_2 = db.Column(db.String(255))
-    legal_person_name = db.Column(db.String(255))
-    legal_person_email = db.Column(db.String(255))
-
+    legal_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
+    tech_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
+    
+    address = relationship("Address", foreign_keys=[address_id])
+    legal_person = relationship('Person', foreign_keys=[legal_person_id])
+    tech_person = relationship('Person', foreign_keys=[tech_person_id])
 
     def save_company(self):
         ''' Method to save company '''
