@@ -1,5 +1,7 @@
 from app.models.baseModel import BaseModel, db
 from sqlalchemy.orm import relationship
+from app.models.person import Person
+from app.models.contact import Contact
 
 
 class ContactPerson(BaseModel):

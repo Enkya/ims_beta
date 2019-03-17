@@ -1,14 +1,18 @@
 from app.models.baseModel import BaseModel, db
-
+from sqlalchemy.orm import relationship
 
 class Employee(BaseModel):
     '''This class represents the company model'''
 
     __table__name = 'employee'
 
-    person_id = db.Column(db.String(255), nullable=False, unique=True)
-    contact_id = db.Column(db.String(120))
-    department_id = db.Column(db.Integer)
+    person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
+    contact_id = db.Column(db.Integer, db.ForeignKey('contact.id'))
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
+    
+    person = relationship("Person", foreign_keys=[person_id])
+    contact = relationship('Contact', foreign_keys=[contact_id])
+    department = relationship('Department', foreign_keys=[department_id])
 
 
     def save_employee(self):
