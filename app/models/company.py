@@ -9,8 +9,6 @@ class Company(BaseModel):
     __table__name = 'company'
 
     name = db.Column(db.String(255), nullable=False, unique=True)
-    postal = db.Column(db.Integer)
-    country = db.Column(db.String(255))
     address_id = db.Column(db.Integer, db.ForeignKey("address.id"))
     legal_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
     tech_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))

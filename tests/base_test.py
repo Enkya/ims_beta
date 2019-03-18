@@ -5,6 +5,7 @@ from app import create_app
 from app.models.baseModel import db
 from app.models.user import User
 from app.models.company import Company
+from app.models.address import Address
 
 
 class BaseCase(unittest.TestCase):
@@ -48,6 +49,13 @@ class BaseCase(unittest.TestCase):
         ''' method to add test users to db '''
         self.user_1.save_user()
         self.user_2.save_user()
+
+    @staticmethod
+    def add_test_addresses():
+        ''' method to add test addresses to db '''
+        address_1 = Address(district='KLA', postal_code=45, country='UG', address_line_1='Plot 103 Kira Road')
+        address_2 = Address(district='NBO', postal_code=7245, country='KE', address_line_1 = 'TRM Drive Roysambu')
+        address_1.save(), address_2.save()
 
     @staticmethod
     def add_test_companies():
