@@ -7,6 +7,7 @@ from flask_bcrypt import Bcrypt
 
 from instance.config import app_config
 from .api.v1.company import company_api
+from .api.v1.address import address_api
 from .api.v1.auth import auth_api
 from .api.v1.user import user_api
 from .models.baseModel import db
@@ -20,6 +21,7 @@ api = Api(api_v1, version='1.0', title='TBD',
           description='TBD')
 
 api.add_namespace(company_api)
+api.add_namespace(address_api)
 api.add_namespace(auth_api)
 api.add_namespace(user_api)
 
