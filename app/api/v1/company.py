@@ -3,6 +3,8 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.company import Company
+from app.models.address import Address
+from app.models.person import Person
 from app.models.user import User
 from app.utils.utilities import auth
 from instance.config import Config
@@ -90,7 +92,7 @@ class CompaniesEndPoint(Resource):
         ''' Create a company '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
-        location = arguments.get('district').strip() or ''
+        district = arguments.get('district').strip() or ''
         postal = arguments.get('postal').strip() or ''
         country = arguments.get('country').strip() or ''
         tech_person_name = arguments.get('techPersonName').strip() or ''
@@ -103,17 +105,18 @@ class CompaniesEndPoint(Resource):
         if not name:
             return abort(400, 'Name cannot be empty!')
         try:
+            address = Address(
+                district=district,
+                postal_code=postal,
+                country=country,
+                address_line_1=address_line_1,
+                address_line_2=address_line_2
+                )
+            if not address.save_address():
+                address = Address.query.filter_by(address_line_1=address.address_line_1, active=True).first()
             company = Company(
                 name=name,
-                location=location,
-                postal=postal,
-                country=country,
-                tech_person_name=tech_person_name,
-                tech_person_email=tech_person_email,
-                address_line_1=address_line_1,
-                address_line_2=address_line_2,
-                legal_person_name=legal_person_name,
-                legal_person_email=legal_person_email
+                address=address
                 )
             if company.save_company():
                 return {'message': 'Company created successfully!'}, 201
