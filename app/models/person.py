@@ -8,7 +8,11 @@ class Person(BaseModel):
     __table__name = 'person'
 
     first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255), nullable=False)
+
+    def __init__(self, first_name, last_name):
+        self.first_name = first_name
+        self.last_name = last_name
 
     @hybrid_property
     def full_name(self):

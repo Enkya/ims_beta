@@ -23,6 +23,10 @@ person_fields = person_api.model(
         'last_name': fields.String(
             description="Person last name",
             example="Smith"),
+        'full_name': fields.String(
+            description="Person Full Name",
+            example="John Smith",
+        ),
         'date_created': fields.DateTime(required=False, attribute='date_created'),
     }
 )
