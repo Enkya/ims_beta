@@ -33,3 +33,7 @@ class ContactPerson(BaseModel):
             self.delete()
             return True
         return False
+
+    def exists(self):
+        ''' Check if company exists '''
+        return True if ContactPerson.query.filter_by(person=self.person, contact=self.contact).first() else False

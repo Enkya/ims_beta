@@ -20,6 +20,17 @@ class Address(BaseModel):
             return True
         return False
 
+    def delete_address(self, deep_delete=False):
+        ''' Method to delete address '''
+        if not deep_delete:
+            if self.deactivate():
+                return True
+            return False
+        if self.exists():
+            self.delete()
+            return True
+        return False
+
     def exists(self):
         ''' Check if contact exists '''
         return True if Address.query.filter_by(address_line_1=self.address_line_1).first() else False

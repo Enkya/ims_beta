@@ -1,6 +1,6 @@
 from app.models.baseModel import BaseModel, db
 from app.models.address import Address
-from app.models.person import Person
+from app.models.contact_person import ContactPerson
 from sqlalchemy.orm import relationship
 
 class Company(BaseModel):
@@ -10,12 +10,12 @@ class Company(BaseModel):
 
     name = db.Column(db.String(255), nullable=False, unique=True)
     address_id = db.Column(db.Integer, db.ForeignKey("address.id"))
-    legal_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
-    tech_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
+    legal_person_id = db.Column(db.Integer, db.ForeignKey('contact_person.id'))
+    tech_person_id = db.Column(db.Integer, db.ForeignKey('contact_person.id'))
     
     address = relationship("Address", foreign_keys=[address_id])
-    legal_person = relationship('Person', foreign_keys=[legal_person_id])
-    tech_person = relationship('Person', foreign_keys=[tech_person_id])
+    legal_person = relationship('ContactPerson', foreign_keys=[legal_person_id])
+    tech_person = relationship('ContactPerson', foreign_keys=[tech_person_id])
 
     def save_company(self):
         ''' Method to save company '''

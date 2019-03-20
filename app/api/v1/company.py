@@ -3,6 +3,10 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.company import Company
+from app.models.address import Address
+from app.models.person import Person
+from app.models.contact import Contact
+from app.models.contact_person import ContactPerson
 from app.models.user import User
 from app.utils.utilities import auth
 from instance.config import Config
@@ -90,30 +94,55 @@ class CompaniesEndPoint(Resource):
         ''' Create a company '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
-        location = arguments.get('district').strip() or ''
+        district = arguments.get('district').strip() or ''
         postal = arguments.get('postal').strip() or ''
         country = arguments.get('country').strip() or ''
-        tech_person_name = arguments.get('techPersonName').strip() or ''
+        tech_person_name_string = arguments.get('techPersonName').strip() or ''
         tech_person_email = arguments.get('techPersonEmail').strip() or ''
         address_line_1 = arguments.get('address1').strip() or ''
         address_line_2 = arguments.get('address1').strip() or ''
-        legal_person_name = arguments.get('legalPersonName').strip() or ''
+        legal_person_name_string = arguments.get('legalPersonName').strip() or ''
         legal_person_email = arguments.get('legalPersonEmail').strip() or ''
+        tech_person_name = tech_person_name_string.split()
+        legal_person_name = legal_person_name_string.split()
 
         if not name:
             return abort(400, 'Name cannot be empty!')
         try:
+            address = Address(
+                district=district,
+                postal_code=postal,
+                country=country,
+                address_line_1=address_line_1,
+                address_line_2=address_line_2
+                )
+            tech_person = Person(tech_person_name[0], tech_person_name[-1])
+            legal_person = Person(legal_person_name[0], legal_person_name[-1])
+            tech_contact = Contact(email=tech_person_email)
+            legal_contact = Contact(email=legal_person_email)
+
+            if not address.save_address():
+                address = Address.query.filter_by(address_line_1=address.address_line_1, active=True).first()
+            if not tech_person.save_person():
+                tech_person = Person.query.filter_by(full_name=tech_person_name_string).first()
+            if not legal_person.save_person():
+                legal_person = Person.query.filter_by(full_name=legal_person_name_string).first()
+            if not tech_contact.save_contact():
+                tech_contact = Contact.query.filter_by(email=tech_person_email).first()
+            if not legal_contact.save_contact():
+                legal_contact = Contact.query.filter_by(email=legal_person_email).first()
+            tech_contact_person = ContactPerson(person=tech_person, contact=tech_contact)
+            legal_contact_person = ContactPerson(person=legal_person, contact=legal_contact)
+            if not tech_contact_person.save_contact_person():
+                tech_contact_person = ContactPerson.query.filter_by(person=tech_person, contact=tech_contact).first()
+            if not legal_contact_person.save_contact_person():
+                legal_contact_person = ContactPerson.query.filter_by(person=legal_person, contact=legal_contact).first()
+
             company = Company(
                 name=name,
-                location=location,
-                postal=postal,
-                country=country,
-                tech_person_name=tech_person_name,
-                tech_person_email=tech_person_email,
-                address_line_1=address_line_1,
-                address_line_2=address_line_2,
-                legal_person_name=legal_person_name,
-                legal_person_email=legal_person_email
+                address=address,
+                legal_person=legal_contact_person,
+                tech_person=tech_contact_person
                 )
             if company.save_company():
                 return {'message': 'Company created successfully!'}, 201
