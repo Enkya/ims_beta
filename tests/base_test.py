@@ -7,6 +7,8 @@ from app.models.user import User
 from app.models.company import Company
 from app.models.address import Address
 from app.models.person import Person
+from app.models.contact import Contact
+from app.models.contact_person import ContactPerson
 
 
 class BaseCase(unittest.TestCase):
@@ -46,6 +48,8 @@ class BaseCase(unittest.TestCase):
         self.add_test_users()
         self.add_test_addresses()
         self.add_test_people()
+        self.add_test_contacts()
+        self.add_test_contact_people()
         self.add_test_companies()
 
     def add_test_users(self):
@@ -60,22 +64,41 @@ class BaseCase(unittest.TestCase):
         address_2 = Address(district='NBO', postal_code=7245, country='KE', address_line_1 = 'TRM Drive Roysambu')
         address_1.save(), address_2.save()
 
-    @staticmethod
-    def add_test_people():
+    def add_test_people(self):
         ''' method to add test people to db '''
-        person_1 = Person(first_name='John', last_name='Smith')
-        person_2 = Person(first_name='Bjorn', last_name='Smit')
-        person_1.save(), person_2.save()
+        self.person_1 = Person(first_name='John', last_name='Smith')
+        self.person_2 = Person(first_name='Bjorn', last_name='Smit')
+        self.person_1.save(), self.person_2.save()
+
+    def add_test_contacts(self):
+        ''' method to add test contacts '''
+        with self.app.app_context():
+            self.contact_1 = Contact(email='test1@test.com')
+            self.contact_2 = Contact(email='test2@test.com')
+            self.contact_1.save(), self.contact_2.save()
+    
+    def add_test_contact_people(self):
+        ''' method to add test contact people'''
+        with self.app.app_context():
+            self.contact_person_1 = ContactPerson(person=self.person_1, contact=self.contact_1)
+            self.contact_person_2 = ContactPerson(person=self.person_2, contact=self.contact_2)
+            self.contact_person_1.save(), self.contact_person_2.save()
 
     def add_test_companies(self):
         ''' method to add test companies to db '''
         with self.app.app_context():
             self.address_1 = Address.query.filter_by(id=1, active=True).first()
             self.address_2 = Address.query.filter_by(id=2, active=True).first()
-            self.legal_person = Person.query.filter_by(id=1, active=True).first()
-            self.tech_person = Person.query.filter_by(id=2, active=True).first()
-        company_1 = Company(name='sample_1', address=self.address_1, legal_person=self.legal_person)
-        company_2 = Company(name='sample_2', address=self.address_2, tech_person=self.tech_person)
+        company_1 = Company(
+            name='sample_1',
+            address=self.address_1,
+            legal_person=self.contact_person_1,
+            tech_person = self.contact_person_2)
+        company_2 = Company(
+            name='sample_2',
+            address=self.address_2,
+            legal_person=self.contact_person_1,
+            tech_person=self.contact_person_2)
         company_1.save(), company_2.save()
 
     def auth_headers(self, email='emugaya@andela.com', password='test'):
