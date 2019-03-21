@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 class Address(BaseModel):
     '''This class represents the Address model'''
 
-    __table__name = 'address'
+    __tablename__ = 'address'
 
     district = db.Column(db.String(255))
     postal_code = db.Column(db.String(255))

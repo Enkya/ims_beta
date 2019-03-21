@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 class Department(BaseModel):
     '''This class represents the department model'''
 
-    __table__name = 'department'
+    __tablename__ = 'department'
 
     name = db.Column(db.String(255))
     description = db.Column(db.String(255))

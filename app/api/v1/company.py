@@ -15,6 +15,27 @@ from instance.config import Config
 company_api = Namespace(
     'companies', description='A company creation namespace')
 
+address_fields = {
+    'district': fields.String(required=False, attribute='district'),
+    'postal': fields.String(required=False, attribute='postal_code'),
+    'country': fields.String(required=False, attribute='country'),
+    'address_line_1': fields.String(required=True, attribute='address_line_1'),
+    'address_line_2': fields.String(required=True, attribute='address_line_2'),
+}
+
+contact_fields = {
+    'email': fields.String(required=True, attribute='email')
+}
+
+person_fields = {
+    'full_name': fields.String(required=True, attribute='full_name')
+}
+
+contact_people_fields = {
+    'contact': fields.Nested(contact_fields),
+    'person': fields.String(required=True, attribute='person.full_name')
+}
+
 company_fields = company_api.model(
     'Company',
     {
@@ -23,15 +44,9 @@ company_fields = company_api.model(
             required=True,
             description="Company name",
             example="test_company"),
-        'location': fields.String(required=False, attribute='location'),
-        'postal': fields.String(required=False, attribute='postal'),
-        'country': fields.String(required=False, attribute='country'),
-        'tech_person_name': fields.String(required=False, attribute='tech_person_name'),
-        'tech_person_email': fields.String(required=False, attribute='tech_person_email'),
-        'address_line_1': fields.String(required=False, attribute='address_line_1'),
-        'address_line_2': fields.String(required=False, attribute='address_line_2'),
-        'legal_person_name': fields.String(required=False, attribute='legal_person_name'),
-        'legal_person_email': fields.String(required=False, attribute='legal_person_email'),
+        'address': fields.Nested(address_fields),
+        'tech_person': fields.Nested(contact_people_fields),
+        'legal_person': fields.Nested(contact_people_fields),
         'date_created': fields.DateTime(required=False, attribute='date_created'),
         'date_modified': fields.DateTime(required=False, attribute='date_modified'),
     }
@@ -55,6 +70,7 @@ class CompaniesEndPoint(Resource):
 
         company_data = Company.query.filter_by(active=True).\
             order_by(desc(Company.date_created))
+        print(company_data.all()[0].legal_person.contact.email)
         if company_data.all():
             companies = company_data
 
@@ -100,7 +116,7 @@ class CompaniesEndPoint(Resource):
         tech_person_name_string = arguments.get('techPersonName').strip() or ''
         tech_person_email = arguments.get('techPersonEmail').strip() or ''
         address_line_1 = arguments.get('address1').strip() or ''
-        address_line_2 = arguments.get('address1').strip() or ''
+        address_line_2 = arguments.get('address2').strip() or ''
         legal_person_name_string = arguments.get('legalPersonName').strip() or ''
         legal_person_email = arguments.get('legalPersonEmail').strip() or ''
         tech_person_name = tech_person_name_string.split()

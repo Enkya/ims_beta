@@ -7,7 +7,7 @@ from app.models.contact import Contact
 class ContactPerson(BaseModel):
     '''This class represents the company model'''
 
-    __table__name = 'contact_person'
+    __tablename__ = 'contact_person'
 
     person_id = db.Column(db.Integer,
                               db.ForeignKey('person.id'), nullable=False)

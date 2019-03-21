@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 class Contact(BaseModel):
     '''This class represents the contact model'''
 
-    __table__name = 'contact'
+    __tablename__ = 'contact'
 
     tel_one = db.Column(db.String(255))
     tel_two = db.Column(db.String(255))

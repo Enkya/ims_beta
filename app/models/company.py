@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 class Company(BaseModel):
     '''This class represents the company model'''
 
-    __table__name = 'company'
+    __tablename__ = 'company'
 
     name = db.Column(db.String(255), nullable=False, unique=True)
     address_id = db.Column(db.Integer, db.ForeignKey("address.id"))
