@@ -9,9 +9,9 @@ class Department(BaseModel):
 
     name = db.Column(db.String(255))
     description = db.Column(db.String(255))
-    size = db.Column(db.Integer(55))
+    size = db.Column(db.Integer)
     permissions = db.Column(db.String(255))
-    
+
     def save_department(self):
         ''' Method to save contact '''
         if not self.exists():
@@ -21,5 +21,5 @@ class Department(BaseModel):
 
     def exists(self):
         ''' Check if department exists '''
-        return True if Department.query.filter_by(name=self.name).first() else False
-
+        return True if Department.query.filter_by(
+            name=self.name).first() else False

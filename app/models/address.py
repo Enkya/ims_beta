@@ -12,7 +12,7 @@ class Address(BaseModel):
     country = db.Column(db.String(255))
     address_line_1 = db.Column(db.String(255))
     address_line_2 = db.Column(db.String(255))
-    
+
     def save_address(self):
         ''' Method to save address '''
         if not self.exists():
@@ -33,5 +33,5 @@ class Address(BaseModel):
 
     def exists(self):
         ''' Check if contact exists '''
-        return True if Address.query.filter_by(address_line_1=self.address_line_1).first() else False
-
+        return True if Address.query.filter_by(
+            address_line_1=self.address_line_1).first() else False

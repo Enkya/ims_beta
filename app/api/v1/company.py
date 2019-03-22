@@ -23,16 +23,12 @@ address_fields = {
     'address_line_2': fields.String(required=True, attribute='address_line_2'),
 }
 
-contact_fields = {
-    'email': fields.String(required=True, attribute='email')
-}
-
 person_fields = {
     'full_name': fields.String(required=True, attribute='full_name')
 }
 
 contact_people_fields = {
-    'contact': fields.Nested(contact_fields),
+    'email': fields.String(required=True, attribute='contact.email'),
     'person': fields.String(required=True, attribute='person.full_name')
 }
 
@@ -47,8 +43,12 @@ company_fields = company_api.model(
         'address': fields.Nested(address_fields),
         'tech_person': fields.Nested(contact_people_fields),
         'legal_person': fields.Nested(contact_people_fields),
-        'date_created': fields.DateTime(required=False, attribute='date_created'),
-        'date_modified': fields.DateTime(required=False, attribute='date_modified'),
+        'date_created': fields.DateTime(
+            required=False,
+            attribute='date_created'),
+        'date_modified': fields.DateTime(
+            required=False,
+            attribute='date_modified'),
     }
 )
 
@@ -70,7 +70,7 @@ class CompaniesEndPoint(Resource):
 
         company_data = Company.query.filter_by(active=True).\
             order_by(desc(Company.date_created))
-        print(company_data.all()[0].legal_person.contact.email)
+        print(company_data.all()[0])
         if company_data.all():
             companies = company_data
 
@@ -90,17 +90,20 @@ class CompaniesEndPoint(Resource):
             }
 
             if page == 1:
-                pages['prev_page'] = url_for('api.company')+'?limit={}'.format(page_limit)
+                pages['prev_page'] = url_for('api.company') + \
+                    '?limit={}'.format(page_limit)
 
             if page > 1:
-                pages['prev_page'] = url_for('api.company')+'?limit={}&page={}'.format(page_limit, page-1)
+                pages['prev_page'] = url_for('api.company') + \
+                    '?limit={}&page={}'.format(page_limit, page-1)
 
             if page < company_paged.pages:
-                pages['next_page'] = url_for('api.company')+'?limit={}&page={}'.format(page_limit, page+1)
+                pages['next_page'] = url_for('api.company') + \
+                    '?limit={}&page={}'.format(page_limit, page+1)
 
             results.update(pages)
             return results, 200
-        return abort(404, message='No companies found for specified user') 
+        return abort(404, message='No companies found for specified user')
 
     @company_api.response(201, 'Company created successfully!')
     @company_api.response(409, 'Company already exists!')
@@ -117,10 +120,10 @@ class CompaniesEndPoint(Resource):
         tech_person_email = arguments.get('techPersonEmail').strip() or ''
         address_line_1 = arguments.get('address1').strip() or ''
         address_line_2 = arguments.get('address2').strip() or ''
-        legal_person_name_string = arguments.get('legalPersonName').strip() or ''
+        legal_person_name_str = arguments.get('legalPersonName').strip() or ''
         legal_person_email = arguments.get('legalPersonEmail').strip() or ''
         tech_person_name = tech_person_name_string.split()
-        legal_person_name = legal_person_name_string.split()
+        legal_person_name = legal_person_name_str.split()
 
         if not name:
             return abort(400, 'Name cannot be empty!')
@@ -138,21 +141,35 @@ class CompaniesEndPoint(Resource):
             legal_contact = Contact(email=legal_person_email)
 
             if not address.save_address():
-                address = Address.query.filter_by(address_line_1=address.address_line_1, active=True).first()
+                address = Address.query.filter_by(
+                    address_line_1=address.address_line_1,
+                    active=True).first()
             if not tech_person.save_person():
-                tech_person = Person.query.filter_by(full_name=tech_person_name_string).first()
+                tech_person = Person.query.filter_by(
+                    full_name=tech_person_name_string).first()
             if not legal_person.save_person():
-                legal_person = Person.query.filter_by(full_name=legal_person_name_string).first()
+                legal_person = Person.query.filter_by(
+                    full_name=legal_person_name_str).first()
             if not tech_contact.save_contact():
-                tech_contact = Contact.query.filter_by(email=tech_person_email).first()
+                tech_contact = Contact.query.filter_by(
+                    email=tech_person_email).first()
             if not legal_contact.save_contact():
-                legal_contact = Contact.query.filter_by(email=legal_person_email).first()
-            tech_contact_person = ContactPerson(person=tech_person, contact=tech_contact)
-            legal_contact_person = ContactPerson(person=legal_person, contact=legal_contact)
+                legal_contact = Contact.query.filter_by(
+                    email=legal_person_email).first()
+            tech_contact_person = ContactPerson(
+                person=tech_person,
+                contact=tech_contact)
+            legal_contact_person = ContactPerson(
+                person=legal_person,
+                contact=legal_contact)
             if not tech_contact_person.save_contact_person():
-                tech_contact_person = ContactPerson.query.filter_by(person=tech_person, contact=tech_contact).first()
+                tech_contact_person = ContactPerson.query.filter_by(
+                    person=tech_person,
+                    contact=tech_contact).first()
             if not legal_contact_person.save_contact_person():
-                legal_contact_person = ContactPerson.query.filter_by(person=legal_person, contact=legal_contact).first()
+                legal_contact_person = ContactPerson.query.filter_by(
+                    person=legal_person,
+                    contact=legal_contact).first()
 
             company = Company(
                 name=name,
@@ -198,8 +215,9 @@ class SingleCompanyEndpoint(Resource):
             company.save()
             return company, 200
         else:
-            abort(404, message='Company with id {} not found or not yours.'.format(
-                company_id))
+            abort(
+                404,
+                message='Company with id {} not found'.format(company_id))
 
     @company_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
@@ -212,8 +230,11 @@ class SingleCompanyEndpoint(Resource):
         if company:
             if company.delete_company():
                 response = {
-                    'message': 'Company with id {} successfully deleted.'.format(company_id)}
+                    'message': 'Company with id {} deleted.'.format(company_id)
+                }
             return response, 200
         else:
-            abort(404, message='Company with id {} not found or not yours.'.format(
-                company_id))
+            abort(
+                404,
+                message='Company with id {} not found.'.format(company_id)
+            )
