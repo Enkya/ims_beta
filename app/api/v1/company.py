@@ -70,7 +70,6 @@ class CompaniesEndPoint(Resource):
 
         company_data = Company.query.filter_by(active=True).\
             order_by(desc(Company.date_created))
-        print(company_data.all()[0])
         if company_data.all():
             companies = company_data
 
