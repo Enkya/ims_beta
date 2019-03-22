@@ -23,8 +23,9 @@ class TestAddressEndpoint(BaseCase):
                 data=json.dumps(self.address_data),
                 headers=self.auth_headers())
         self.assertEqual(response.status_code, 201)
-        self.assertEqual('Address created successfully!',
-                         json.loads(response.data.decode('utf-8')).get('message'))
+        self.assertEqual(
+            'Address created successfully!',
+            json.loads(response.data.decode('utf-8')).get('message'))
 
     def test_get_returns_all_addresses(self):
         with self.app.app_context():
@@ -68,22 +69,28 @@ class TestAddressEndpoint(BaseCase):
                                          headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(result.get('address_line_1'), update_fields.get('address1'))
+        self.assertEqual(
+            result.get('address_line_1'),
+            update_fields.get('address1'))
 
     def test_delete_removes_address_from_database(self):
         with self.app.app_context():
 
-            self.assertEqual(len(Address.query.filter_by(active=True).all()), 2)
+            self.assertEqual(
+                len(Address.query.filter_by(active=True).all()),
+                2)
 
             response = self.client().delete('/api/v1/addresses/1',
                                             headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(result.get('message'), 'Address with id 1 successfully deleted.')
+        self.assertEqual(result.get('message'), 'Address with id 1 deleted.')
         with self.app.app_context():
-            self.assertEqual(len(Address.query.filter_by(active=True).all()), 1)
+            self.assertEqual(
+                len(Address.query.filter_by(active=True).all()),
+                1)
 
-    def test_search_returns_addresses_whose_address_includes_the_search_term(self):
+    def test_search_returns_results_for_valid_search_term(self):
         with self.app.app_context():
             response = self.client().get('/api/v1/addresses?q=TRM Drive',
                                          headers=self.auth_headers())
@@ -98,6 +105,9 @@ class TestAddressEndpoint(BaseCase):
         result = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        expected_result = sorted(['data', 'next_page','page', 'per_page', 'total_data', 'pages', 'prev_page'])
+        expected_result = sorted(
+            [
+                'data', 'next_page',
+                'page', 'per_page', 'total_data', 'pages', 'prev_page'])
         self.assertListEqual(sorted(result.keys()), expected_result)
         self.assertEqual(len(result.get('data')), 1)

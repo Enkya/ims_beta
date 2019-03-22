@@ -17,7 +17,7 @@ class Person(BaseModel):
     @hybrid_property
     def full_name(self):
         return self.first_name + ' ' + self.last_name
-    
+
     def save_person(self):
         ''' Method to save person '''
         if not self.exists():
@@ -27,7 +27,8 @@ class Person(BaseModel):
 
     def exists(self):
         ''' Check if person exists '''
-        return True if Person.query.filter_by(full_name=self.full_name).first() else False
+        return True if Person.query.filter_by(
+            full_name=self.full_name).first() else False
 
     def __repr__(self):
         return "<Person: {}>".format(self.full_name)

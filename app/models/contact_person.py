@@ -7,13 +7,15 @@ from app.models.contact import Contact
 class ContactPerson(BaseModel):
     '''This class represents the company model'''
 
-    __table__name = 'contact_person'
+    __tablename__ = 'contact_person'
 
-    person_id = db.Column(db.Integer,
-                              db.ForeignKey('person.id'), nullable=False)
+    person_id = db.Column(
+        db.Integer,
+        db.ForeignKey('person.id'), nullable=False)
     # does not cascade
-    contact_id = db.Column(db.Integer,
-                              db.ForeignKey('contact.id'), nullable=False)
+    contact_id = db.Column(
+        db.Integer,
+        db.ForeignKey('contact.id'), nullable=False)
 
     person = relationship('Person', foreign_keys=[person_id])
     contact = relationship('Contact', foreign_keys=[contact_id])
@@ -36,4 +38,6 @@ class ContactPerson(BaseModel):
 
     def exists(self):
         ''' Check if company exists '''
-        return True if ContactPerson.query.filter_by(person=self.person, contact=self.contact).first() else False
+        return True if ContactPerson.query.filter_by(
+            person=self.person,
+            contact=self.contact).first() else False

@@ -9,6 +9,7 @@ from instance.config import app_config
 from .api.v1.company import company_api
 from .api.v1.address import address_api
 from .api.v1.person import person_api
+from .api.v1.department import department_api
 from .api.v1.auth import auth_api
 from .api.v1.user import user_api
 from .models.baseModel import db
@@ -26,6 +27,7 @@ api.add_namespace(address_api)
 api.add_namespace(person_api)
 api.add_namespace(auth_api)
 api.add_namespace(user_api)
+api.add_namespace(department_api)
 
 
 def create_app(config_name):

@@ -53,5 +53,6 @@ class TestCompanyModel(BaseCase):
 
     def Company_item_list(self):
         with self.app.app_context():
-            company = Company.query.filter_by(name="sample_1", active=True).first()
+            company = Company.query.filter_by(
+                name="sample_1", active=True).first()
         self.assertTrue(isinstance(company.company_items, list))

@@ -20,10 +20,14 @@ address_fields = address_api.model(
             example="Wakiso"),
         'postal_code': fields.String(required=False, attribute='postal_code'),
         'country': fields.String(required=False, attribute='country'),
-        'address_line_1': fields.String(required=False, attribute='address_line_1'),
-        'address_line_2': fields.String(required=False, attribute='address_line_2'),
-        'date_created': fields.DateTime(required=False, attribute='date_created'),
-        'date_modified': fields.DateTime(required=False, attribute='date_modified'),
+        'address_line_1': fields.String(
+            required=False, attribute='address_line_1'),
+        'address_line_2': fields.String(
+            required=False, attribute='address_line_2'),
+        'date_created': fields.DateTime(
+            required=False, attribute='date_created'),
+        'date_modified': fields.DateTime(
+            required=False, attribute='date_modified'),
     }
 )
 
@@ -64,17 +68,20 @@ class AddressesEndPoint(Resource):
             }
 
             if page == 1:
-                pages['prev_page'] = url_for('api.address')+'?limit={}'.format(page_limit)
+                pages['prev_page'] = url_for(
+                    'api.address')+'?limit={}'.format(page_limit)
 
             if page > 1:
-                pages['prev_page'] = url_for('api.address')+'?limit={}&page={}'.format(page_limit, page-1)
+                pages['prev_page'] = url_for('api.address') + \
+                    '?limit={}&page={}'.format(page_limit, page-1)
 
             if page < address_paged.pages:
-                pages['next_page'] = url_for('api.address')+'?limit={}&page={}'.format(page_limit, page+1)
+                pages['next_page'] = url_for('api.address') + \
+                    '?limit={}&page={}'.format(page_limit, page+1)
 
             results.update(pages)
             return results, 200
-        return abort(404, message='No addresses found for specified user') 
+        return abort(404, message='No addresses found for specified user')
 
     @address_api.response(201, 'Address created successfully!')
     @address_api.response(409, 'Address already exists!')
@@ -137,8 +144,10 @@ class SingleAddressEndpoint(Resource):
             address.save()
             return address, 200
         else:
-            abort(404, message='Address with id {} not found or not yours.'.format(
-                address_id))
+            abort(
+                404,
+                message='Address with id {} not found'.format(address_id)
+            )
 
     @address_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
@@ -151,8 +160,11 @@ class SingleAddressEndpoint(Resource):
         if address:
             if address.delete_address():
                 response = {
-                    'message': 'Address with id {} successfully deleted.'.format(address_id)}
+                    'message': 'Address with id {} deleted.'.format(address_id)
+                }
             return response, 200
         else:
-            abort(404, message='Address with id {} not found or not yours.'.format(
-                address_id))
+            abort(
+                404,
+                message='Address with id {} not found.'.format(address_id)
+            )

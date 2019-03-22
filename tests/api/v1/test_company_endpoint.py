@@ -28,8 +28,9 @@ class TestCompanyEndpoint(BaseCase):
                 data=json.dumps(self.company_data),
                 headers=self.auth_headers())
         self.assertEqual(response.status_code, 201)
-        self.assertEqual('Company created successfully!',
-                         json.loads(response.data.decode('utf-8')).get('message'))
+        self.assertEqual(
+            'Company created successfully!',
+            json.loads(response.data.decode('utf-8')).get('message'))
 
     def test_get_returns_all_companies_for_user(self):
         with self.app.app_context():
@@ -68,15 +69,19 @@ class TestCompanyEndpoint(BaseCase):
     def test_delete_removes_company_from_database(self):
         with self.app.app_context():
 
-            self.assertEqual(len(Company.query.filter_by(active=True).all()), 2)
+            self.assertEqual(
+                len(Company.query.filter_by(active=True).all()),
+                2)
 
             response = self.client().delete('/api/v1/companies/1',
                                             headers=self.auth_headers())
         result = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(result.get('message'), 'Company with id 1 successfully deleted.')
+        self.assertEqual(result.get('message'), 'Company with id 1 deleted.')
         with self.app.app_context():
-            self.assertEqual(len(Company.query.filter_by(active=True).all()), 1)
+            self.assertEqual(
+                len(Company.query.filter_by(active=True).all()),
+                1)
 
     def test_search_returns_companies_whose_name_matches_a_search_term(self):
         with self.app.app_context():
@@ -93,6 +98,9 @@ class TestCompanyEndpoint(BaseCase):
         result = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(response.status_code, 200)
-        expected_result = sorted(['data', 'next_page','page', 'per_page', 'total_data', 'pages', 'prev_page'])
+        expected_result = sorted(
+            [
+                'data', 'next_page',
+                'page', 'per_page', 'total_data', 'pages', 'prev_page'])
         self.assertListEqual(sorted(result.keys()), expected_result)
         self.assertEqual(len(result.get('data')), 1)
