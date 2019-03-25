@@ -1,17 +1,39 @@
+from app.models.baseModel import BaseModel, db
+from sqlalchemy.orm import relationship
 
-# "service_category": "Broadcasting",
-# "number_type": "Short Code",
-# "service_name": "mouchterlony0@slashdot.org",
-# "applicable_service_type": "Special Services",
-# "description": "commodo vulputate justo in blandit ultrices enim lorem ipsum dolor sit amet consectetuer",
-# "assigned_range": 2,
-# "assigned_number": 3,
-# "assignment_date": "10/9/2018",
-# "assigned_by": 965,
-# "last_auth_renewal_date": "3/11/2018",
-# "is_compliant": false,
-# "notes": "amet cursus id turpis integer aliquet massa id lobortis convallis tortor risus dapibus augue vel accumsan tellus nisi eu",
-# "recommendations": "sit amet justo morbi ut odio cras mi pede malesuada in imperdiet et commodo",
-# "report": 595,
-# "last_updated": "3/23/2018",
-# "last_updated_by": 560
+
+class Numbering(BaseModel):
+    ''' This class represents the Numbering model '''
+
+    __tablename__ = 'numbering'
+    service_category = db.Column(db.String(255))
+    number_type = db.Column(db.String(255))
+    service_provider_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    applicable_service_type = db.Column(db.String(255))
+    description = db.Column(db.String(255))
+    assigned_range = db.Column(db.Integer)
+    assigned_number = db.Column(db.Integer)
+    assignment_date = db.Column(
+        db.DateTime,
+        default=db.func().current_timestamp())
+    assigned_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    last_auth_renewal_date = db.Column(db.DateTime)
+    is_compliant = db.Column(db.Boolean, default=True)
+    notes = db.Column(db.String(255))
+    recommendations = db.Column(db.String(255))
+    report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
+    last_updated_by_id = db.Column(
+        db.Integer,
+        db.ForeignKey('employee.id'))
+
+    last_updated_by = relationship(
+        'Employee',
+        foreign_keys=[last_updated_by_id])
+    report = relationship(
+        'Report',
+        foreign_keys=[report_id]
+    )
+    assigned_by = relationship(
+        'Employee',
+        foreign_keys=[assigned_by_id]
+    )
