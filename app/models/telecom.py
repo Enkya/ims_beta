@@ -1,17 +1,65 @@
-    # "id": 1,
-    # "service_details": "ut volutpat sapien arcu sed augue aliquam erat volutpat in congue etiam justo etiam pretium iaculis justo in",
-    # "service_technology": "nibh ligula nec sem duis aliquam convallis nunc proin at turpis a pede",
-    # "qos_requirements_status": "massa id nisl venenatis lacinia aenean sit amet justo morbi ut odio cras mi pede malesuada in imperdiet et",
-    # "coverage_area_details": "bibendum imperdiet nullam orci pede venenatis non sodales sed tincidunt eu felis fusce posuere felis sed lacus morbi",
-    # "sharing_requirements": "pulvinar sed nisl nunc rhoncus dui vel sem sed sagittis nam congue risus semper porta volutpat quam",
-    # "protection_status": "tincidunt eu felis fusce posuere felis sed lacus morbi sem mauris laoreet ut",
-    # "essential_resource_auth_status": "ut at dolor quis odio consequat varius integer ac leo pellentesque ultrices mattis odio donec vitae nisi",
-    # "outage_status": "elit sodales scelerisque mauris sit amet eros suspendisse accumsan tortor",
-    # "outage_report": 503,
-    # "emergency_service_requirements": "nibh in quis justo maecenas rhoncus aliquam lacus morbi quis tortor id nulla ultrices aliquet maecenas leo odio",
-    # "general_provisions": "nulla nunc purus phasellus in felis donec semper sapien a libero nam dui proin leo odio porttitor id consequat",
-    # "notes": "et tempus semper est quam pharetra magna ac consequat metus sapien ut nunc vestibulum ante",
-    # "recommendations": "felis ut at dolor quis odio consequat varius integer ac leo pellentesque ultrices",
-    # "report": 31,
-    # "inspected_by": 829,
-    # "reviewed_by": 11
+from app.models.baseModel import BaseModel, db
+from sqlalchemy.orm import relationship
+
+
+class Telecom(BaseModel):
+    ''' This class represents the telecom modal '''
+
+    __tablename__ = 'telecom'
+    service_details = db.Column(db.String(255))
+    service_technology = db.Column(db.String(255))
+    qos_requirements_claims_status = db.Column(db.String(255))
+    coverage_area_details = db.Column(db.String(255))
+    sharing_requirements = db.Column(db.String(255))
+    protection_status = db.Column(db.String(255))
+    essential_resource_auth_status = db.Column(db.String(255))
+    outage_status = db.Column(db.String(255))
+    emergency_service_requirements = db.Column(db.String(255))
+    general_provisions = db.Column(db.String(255))
+    notes = db.Column(db.String(255))
+    recommendations = db.Column(db.String(255))
+    outage_report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
+    report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
+    reviewed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    approved_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+
+    outage_report = relationship(
+        'Report',
+        foreign_keys=[outage_report_id]
+    )
+    report = relationship(
+        'Report',
+        foreign_keys=[report_id]
+    )
+    inspected_by = relationship(
+        'Employee',
+        foreign_keys=[inspected_by_id]
+    )
+    reviewed_by = relationship(
+        'Employee',
+        foreign_keys=[reviewed_by_id]
+    )
+
+    def save_telecom(self):
+        ''' Method to save telecom '''
+        if not self.exists():
+            self.save()
+            return True
+        return False
+
+    def delete_telecom(self, deep_delete=False):
+        ''' Method to delete telecom '''
+        if not deep_delete:
+            if self.deactivate():
+                return True
+            return False
+        if self.exists():
+            self.delete()
+            return True
+        return False
+
+    def exists(self):
+        ''' Check if telecom exists '''
+        return True if Telecom.query.filter_by(
+            service_details=self.service_details,
+            active=True).first() else False

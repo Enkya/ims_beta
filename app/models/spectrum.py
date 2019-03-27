@@ -1,14 +1,59 @@
-    # "assigned_transmission_power": 30,
-    # "authorized_antenna_gain": 88,
-    # "autorized_antenna_height": 99,
-    # "authorized_transmit_location": 90,
-    # "assigned_stl_frequency": 85,
-    # "assigned_stl_power": 55,
-    # "assigned_stl_location": 41.430751,
-    # "tx_freq_assign_date": "10/17/2017",
-    # "stl_freq_assign_date": "8/19/2017",
-    # "band_of_operation": "KHz",
-    # "service_authorized": "Digital TV",
-    # "assigned_by": 76,
-    # "authorised_by": 935,
-    # "report": 811
+from app.models.baseModel import BaseModel, db
+from sqlalchemy.orm import relationship
+
+
+class Spectrum(BaseModel):
+    ''' This class represents the spectrum modal '''
+
+    __tablename__ = 'spectrum'
+    assigned_transmission_power = db.Column(db.Integer)
+    authorized_antenna_gain = db.Column(db.Integer)
+    authorized_antenna_height = db.Column(db.Integer)
+    authorized_transmit_location = db.Column(db.Integer)
+    assigned_stl_frequency = db.Column(db.Integer)
+    assigned_stl_power = db.Column(db.Integer)
+    assigned_stl_location = db.Column(db.String(255))
+    tx_freq_assign_date = db.Column(db.DateTime)
+    stl_freq_assign_date = db.Column(db.DateTime)
+    band_of_operation = db.Column(db.String(255))
+    service_authorized = db.Column(db.String(255))
+    report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
+    authorized_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    assigned_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+
+    report = relationship(
+        'Report',
+        foreign_keys=[report_id]
+    )
+    authorized_by = relationship(
+        'Employee',
+        foreign_keys=[authorized_by_id]
+    )
+    assigned_by = relationship(
+        'Employee',
+        foreign_keys=[assigned_by_id]
+    )
+
+    def save_spectrum(self):
+        ''' Method to save spectrum '''
+        if not self.exists():
+            self.save()
+            return True
+        return False
+
+    def delete_spectrum(self, deep_delete=False):
+        ''' Method to delete spectrum '''
+        if not deep_delete:
+            if self.deactivate():
+                return True
+            return False
+        if self.exists():
+            self.delete()
+            return True
+        return False
+
+    def exists(self):
+        ''' Check if spectrum exists '''
+        return True if Spectrum.query.filter_by(
+            assigned_stl_location=self.assigned_stl_location,
+            active=True).first() else False
