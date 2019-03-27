@@ -15,7 +15,7 @@ class Numbering(BaseModel):
     assigned_number = db.Column(db.Integer)
     assignment_date = db.Column(
         db.DateTime,
-        default=db.func().current_timestamp())
+        default=db.func.current_timestamp())
     assigned_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     last_auth_renewal_date = db.Column(db.DateTime)
     is_compliant = db.Column(db.Boolean, default=True)
@@ -30,12 +30,16 @@ class Numbering(BaseModel):
         'Employee',
         foreign_keys=[last_updated_by_id])
     report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[report_id]
     )
     assigned_by = relationship(
         'Employee',
         foreign_keys=[assigned_by_id]
+    )
+    service_provider = relationship(
+        'Company',
+        foreign_keys=[service_provider_id]
     )
 
     def save_numbering(self):
