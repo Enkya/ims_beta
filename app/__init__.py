@@ -15,6 +15,7 @@ from .api.v1.user import user_api
 from .api.v1.contact import contact_api
 from .api.v1.employee import employee_api
 from .api.v1.numbering import numbering_api
+from .api.v1.typeapproval import typeapproval_api
 from .models.baseModel import db
 
 bcrypt = Bcrypt()
@@ -34,6 +35,7 @@ api.add_namespace(department_api)
 api.add_namespace(contact_api)
 api.add_namespace(employee_api)
 api.add_namespace(numbering_api)
+api.add_namespace(typeapproval_api)
 
 
 def create_app(config_name):

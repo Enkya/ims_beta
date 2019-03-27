@@ -6,7 +6,7 @@ class Typeapproval(BaseModel):
     ''' This class represents the typeapproval modal '''
 
     __tablename__ = 'typeapproval'
-    ta_unique_id = db.Column(db.String(255), unique=True, nullable=False)
+    ta_unique_id = db.Column(db.String(255), unique=True)
     equipment_category = db.Column(db.String(255))
     status_approved = db.Column(db.Boolean)
     equipment_name = db.Column(db.String(255))
@@ -17,14 +17,14 @@ class Typeapproval(BaseModel):
     ta_certificate_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     assessed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
-    applicant_id = db.Column(db.integer, db.ForeignKey('contact_person.id'))
+    applicant_id = db.Column(db.Integer, db.ForeignKey('contact_person.id'))
 
     ta_certificate = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[ta_certificate_id]
     )
     report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[report_id]
     )
     assessed_by = relationship(
