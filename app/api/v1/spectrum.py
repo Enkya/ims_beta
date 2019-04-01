@@ -5,8 +5,10 @@ from sqlalchemy import desc
 from app.models.company import Company
 from app.models.resource import ResourceMeta
 from app.models.spectrum import Spectrum
+from app.models.employee import Employee
 from app.utils.utilities import auth
 from instance.config import Config
+from datetime import datetime
 
 
 spectrum_api = Namespace(
@@ -16,11 +18,37 @@ spectrum_fields = spectrum_api.model(
     'Spectrum',
     {
         'id': fields.Integer(),
+        'assignedTransmissionPower': fields.Integer(
+            attribute='assigned_transmission_power'),
+        'authorizedAntennaGain': fields.Integer(
+            attribute='authorized_antenna_gain'),
+        'authorizedAntennaHeight': fields.Integer(
+            attribute='authorized_antenna_height'),
+        'authorized_transmit_location': fields.String(
+            attribute='authorized_transmit_location'),
+        'assignedStlFrequency': fields.Integer(
+            attribute='assigned_stl_frequency'),
+        'assignedStlPower': fields.Integer(
+            attribute='assigned_stl_power'),
+        'assignedStlLocation': fields.String(
+            attribute='assigned_stl_location'),
+        'txFreqAssignDate': fields.DateTime(
+            attribute='tx_freq_assign_date'),
+        'stlFreqAssignDate': fields.DateTime(
+            attribute='stl_freq_assign_date'),
+        'bandOfOperation': fields.String(
+            attribute='band_of_operation'),
+        'serviceAuthorized': fields.String(
+            attribute='service_authorized'),
+        'authorizedBy': fields.String(
+            attribute='authorized_by.contact_person.person.full_name'),
+        'assignedBy': fields.String(
+            attribute='assigned_by.contact_person.person.full_name'),
+        'report': fields.String(attribute='report.full_name'),
+        'applicant': fields.String(required=False, attribute='applicant.name'),
         'date_created': fields.DateTime(
-            required=False,
             attribute='date_created'),
         'date_modified': fields.DateTime(
-            required=False,
             attribute='date_modified'),
     }
 )
@@ -91,9 +119,37 @@ class SpectrumEndPoint(Resource):
     def post(self):
         ''' Create a spectrum resource'''
         arguments = request.get_json(force=True)
-        status_approved = arguments.get('statusApproved') or False
-        applicant_id = int(arguments.get('applicant').strip())
-        report_url = arguments.get('report').strip() or ''
+        assigned_transmission_power = int(
+            arguments.get('assignedTransmissionPower').strip()) or None
+        authorized_antenna_gain = int(
+            arguments.get('authorizedAntennaGain').strip()) or None
+        authorized_antenna_height = int(
+            arguments.get('authorizedAntennaHeight').strip()) or None
+        authorized_transmit_location = arguments.get(
+            'authorizedTransmitLocation').strip() or None
+        assigned_stl_frequency = int(
+            arguments.get('authorizedStlFrequency').strip()) or None
+        assigned_stl_power = int(
+            arguments.get('authorizedStlPower').strip()) or None
+        assigned_stl_location = arguments.get(
+            'authorizedStlLocation').strip() or None
+        tx_freq_assign_date = arguments.get(
+            'txFreqAssignDate').strip() or None
+        tx_freq_assign_date = datetime.strptime(
+            tx_freq_assign_date, '%d-%m-%y'
+        )
+        stl_freq_assign_date = arguments.get(
+            'stlFreqAssignDate').strip() or None
+        stl_freq_assign_date = datetime.strptime(
+            stl_freq_assign_date, '%d-%m-%y'
+        )
+        band_of_operation = arguments.get('bandOfOperation').strip() or None
+        service_authorized = arguments.get('serviceAuthorized').strip() or None
+
+        assigned_by_id = int(arguments.get('assignedBy').strip()) or None
+        authorized_by_id = int(arguments.get('authorizedBy').strip()) or None
+        applicant_id = int(arguments.get('applicant').strip()) or None
+        report_url = arguments.get('report').strip() or None
 
         try:
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
@@ -102,11 +158,30 @@ class SpectrumEndPoint(Resource):
                     version=1,
                     name=report_url.split('/')[-1],
                     location=report_url.split('/')[:-1])
+            if not applicant_id:
+                return abort(400, message='Applicant needed to process data')
             applicant = Company.query.filter_by(
                 id=applicant_id,
                 active=True).first()
+            assigned_by = Employee.query.filter_by(
+                id=assigned_by_id).first()
+            authorized_by = Employee.query.filter_by(
+                id=authorized_by_id).first()
+
             spectrum = Spectrum(
-                status_approved=status_approved,
+                assigned_transmission_power=assigned_transmission_power,
+                authorized_antenna_gain=authorized_antenna_gain,
+                authorized_antenna_height=authorized_antenna_height,
+                authorized_transmit_location=authorized_transmit_location,
+                assigned_stl_frequency=assigned_stl_frequency,
+                assigned_stl_power=assigned_stl_power,
+                assigned_stl_location=assigned_stl_location,
+                tx_freq_assign_date=tx_freq_assign_date,
+                stl_freq_assign_date=stl_freq_assign_date,
+                band_of_operation=band_of_operation,
+                service_authorized=service_authorized,
+                assigned_by=assigned_by,
+                authorized_by=authorized_by,
                 applicant=applicant,
                 report=report
                 )

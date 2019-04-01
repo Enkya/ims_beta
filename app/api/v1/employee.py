@@ -101,11 +101,11 @@ class EmployeesEndPoint(Resource):
         arguments = request.get_json(force=True)
         first_name = arguments.get('firstName').strip()
         last_name = arguments.get('lastName').strip()
-        department = arguments.get('department').strip() or ''
-        tel_one = arguments.get('telOne').strip() or ''
-        tel_two = arguments.get('telTwo').strip() or ''
-        email = arguments.get('email').strip() or ''
-        role = arguments.get('role').strip() or ''
+        department = arguments.get('department').strip() or None
+        tel_one = arguments.get('telOne').strip() or None
+        tel_two = arguments.get('telTwo').strip() or None
+        email = arguments.get('email').strip() or None
+        role = arguments.get('role').strip() or None
 
         if not last_name:
             return abort(400, 'Name cannot be empty!')

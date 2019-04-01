@@ -91,10 +91,10 @@ class AddressesEndPoint(Resource):
         ''' Create an address '''
         arguments = request.get_json(force=True)
         district = arguments.get('district').strip()
-        postal = arguments.get('postal').strip() or ''
-        country = arguments.get('country').strip() or ''
-        address_line_1 = arguments.get('address1').strip() or ''
-        address_line_2 = arguments.get('address1').strip() or ''
+        postal = arguments.get('postal').strip() or None
+        country = arguments.get('country').strip() or None
+        address_line_1 = arguments.get('address1').strip() or None
+        address_line_2 = arguments.get('address1').strip() or None
 
         if not address_line_1:
             return abort(400, 'Address cannot be empty!')

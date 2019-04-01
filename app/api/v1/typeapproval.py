@@ -43,7 +43,7 @@ typeapproval_fields = typeapproval_api.model(
         'applicant': fields.String(required=False, attribute='applicant.name'),
         'assessedBy': fields.String(
             required=False,
-            attribute='employee.contact_person.person.full_name'),
+            attribute='assessed_by.contact_person.person.full_name'),
         'report': fields.String(required=False, attribute='report.full_name'),
         'taCertificate': fields.String(
             required=False,
@@ -122,25 +122,23 @@ class TypeapprovalEndPoint(Resource):
     def post(self):
         ''' Create a typeapproval resource'''
         arguments = request.get_json(force=True)
-        ta_unique_id = (arguments.get('taUniqueId') or '').strip()
+        ta_unique_id = arguments.get('taUniqueId').strip() or None
         status_approved = arguments.get('statusApproved') or False
-        equipment_category = (
-            arguments.get('equipmentCategory') or '').strip()
-        equipment_name = (arguments.get('equipmentName') or '').strip()
-        equipment_model = (arguments.get('equipmentModel') or '').strip()
-        equipment_desc = (arguments.get('equipmentDesc') or '').strip()
-        applicable_standards = (
-            arguments.get('applicableStandards') or '').strip()
-        approval_rejection_date = (
-            arguments.get('approvalRejectionDate') or '').strip()
+        equipment_category = arguments.get('equipmentCategory').strip() or None
+        equipment_name = arguments.get('equipmentName').strip() or None
+        equipment_model = arguments.get('equipmentModel').strip() or None
+        equipment_desc = arguments.get('equipmentDesc').strip() or None
+        applicable_standards = arguments.get(
+            'applicableStandards').strip() or None
+        approval_rejection_date = arguments.get(
+            'approvalRejectionDate').strip() or None
         approval_rejection_date = datetime.strptime(
             approval_rejection_date, '%d-%m-%y'
         )
-        ta_certificate_id = (
-            arguments.get('taCertificateID') or '').strip()
-        assessed_by_id = (arguments.get('assessedBy') or '').strip()
-        applicant_id = int((arguments.get('applicant') or 0).strip())
-        report_url = (arguments.get('report') or '').strip()
+        ta_certificate_id = arguments.get('taCertificateID').strip() or None
+        assessed_by_id = arguments.get('assessedBy').strip() or None
+        applicant_id = int(arguments.get('applicant').strip()) or None
+        report_url = arguments.get('report').strip() or None
 
         try:
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
@@ -149,6 +147,8 @@ class TypeapprovalEndPoint(Resource):
                     version=1,
                     name=report_url.split('/')[-1],
                     location=report_url.split('/')[:-1])
+            if not applicant_id:
+                return abort(400, message='Applicant needed to process data')
             applicant = Company.query.filter_by(
                 id=applicant_id,
                 active=True).first()

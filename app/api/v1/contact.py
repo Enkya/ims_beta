@@ -93,10 +93,10 @@ class ContactsEndPoint(Resource):
         ''' Create an contact '''
         arguments = request.get_json(force=True)
         district = arguments.get('district').strip()
-        postal = arguments.get('postal').strip() or ''
-        country = arguments.get('country').strip() or ''
-        contact_line_1 = arguments.get('contact1').strip() or ''
-        contact_line_2 = arguments.get('contact1').strip() or ''
+        postal = arguments.get('postal').strip() or None
+        country = arguments.get('country').strip() or None
+        contact_line_1 = arguments.get('contact1').strip() or None
+        contact_line_2 = arguments.get('contact1').strip() or None
 
         if not contact_line_1:
             return abort(400, 'Contact cannot be empty!')
