@@ -5,15 +5,17 @@ from sqlalchemy import desc
 from app.models.company import Company
 from app.models.resource import ResourceMeta
 from app.models.numbering import Numbering
+from app.models.employee import Employee
 from app.utils.utilities import auth
 from instance.config import Config
+from datetime import datetime
 
 
 numbering_api = Namespace(
     'numbering', description='A numbering creation namespace')
 
 service_provider_fields = {
-    'name': fields.String(required=False, attribute='company.name')
+    'name': fields.String(required=False, attribute='service_provider.name')
 }
 
 numbering_fields = numbering_api.model(
@@ -24,13 +26,25 @@ numbering_fields = numbering_api.model(
             required=True,
             attribute='service_category'),
         'numberType': fields.String(attribute='number_type'),
+        'applicableServiceType': fields.String(
+            attribute='applicable_service_type'),
+        'description': fields.String(attribute='description'),
+        'assignedRange': fields.Integer(attribute='assigned_range'),
+        'assignedNumber': fields.Integer(attribute='assigned_number'),
+        'assignmentDate': fields.DateTime(attribute='assignment_date'),
+        'lastAuthRenewalDate': fields.DateTime(
+            attribute='last_auth_renewal_date'),
+        'isCompliant': fields.Boolean(attribute='is_compliant'),
+        'notes': fields.String(attribute='notes'),
+        'recommendations': fields.String(attribute='recommendations'),
         'service_provider': fields.Nested(service_provider_fields),
+        'report': fields.String(attribute='report.full_name'),
         'date_created': fields.DateTime(
             required=False,
             attribute='date_created'),
         'date_modified': fields.DateTime(
             required=False,
-            attribute='date_modified'),
+            attribute='date_modified')
     }
 )
 
@@ -97,10 +111,28 @@ class NumberingEndPoint(Resource):
     def post(self):
         ''' Create a numbering resource'''
         arguments = request.get_json(force=True)
-        service_category = arguments.get('serviceCategory').strip()
-        service_provider_id = int(arguments.get('serviceProvider').strip())
-        number_type = arguments.get('numberType').strip() or ''
-        report_url = arguments.get('report').strip() or ''
+        service_category = arguments.get('serviceCategory').strip() or None
+        service_provider_id = int(arguments.get(
+            'serviceProvider').strip()) or None
+        number_type = arguments.get('numberType').strip() or None
+        applicable_service_type = arguments.get(
+            'applicableServiceType').strip() or None
+        description = arguments.get('description').strip() or None
+        assigned_range = int(arguments.get('assignedRange').strip()) or None
+        assigned_number = int(arguments.get('assignedNumber').strip()) or None
+        assignment_date = arguments.get('assignmentDate').strip()
+        assignment_date = datetime.strptime(
+            assignment_date, '%d-%m-%y'
+        ) if assignment_date else None
+        last_auth_renewal_date = arguments.get('lastAuthRenewalDate').strip()
+        last_auth_renewal_date = datetime.strptime(
+            last_auth_renewal_date, '%d-%m-%y'
+        ) if last_auth_renewal_date else None
+        is_compliant = arguments.get('isCompliant') or False
+        notes = arguments.get('notes').strip() or None
+        recommendations = arguments.get('recommendations').strip() or None
+        assigned_by_id = arguments.get('assignedBy').strip() or None
+        report_url = arguments.get('report').strip() or None
 
         if not service_category:
             return abort(400, 'Service Category cannot be empty!')
@@ -114,10 +146,21 @@ class NumberingEndPoint(Resource):
             service_provider = Company.query.filter_by(
                 id=service_provider_id,
                 active=True).first()
+            assigned_by = Employee.query.filter_by(id=assigned_by_id).first()
             numbering = Numbering(
                 service_category=service_category,
                 service_provider=service_provider,
                 number_type=number_type,
+                applicable_service_type=applicable_service_type,
+                description=description,
+                assigned_range=assigned_range,
+                assigned_number=assigned_number,
+                assignment_date=assignment_date,
+                last_auth_renewal_date=last_auth_renewal_date,
+                is_compliant=is_compliant,
+                notes=notes,
+                recommendations=recommendations,
+                assigned_by=assigned_by,
                 report=report
                 )
             if numbering.save_numbering():

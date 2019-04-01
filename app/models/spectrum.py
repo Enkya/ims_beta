@@ -9,7 +9,7 @@ class Spectrum(BaseModel):
     assigned_transmission_power = db.Column(db.Integer)
     authorized_antenna_gain = db.Column(db.Integer)
     authorized_antenna_height = db.Column(db.Integer)
-    authorized_transmit_location = db.Column(db.Integer)
+    authorized_transmit_location = db.Column(db.String)
     assigned_stl_frequency = db.Column(db.Integer)
     assigned_stl_power = db.Column(db.Integer)
     assigned_stl_location = db.Column(db.String(255))
@@ -20,9 +20,10 @@ class Spectrum(BaseModel):
     report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     authorized_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     assigned_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    applicant_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[report_id]
     )
     authorized_by = relationship(
@@ -32,6 +33,10 @@ class Spectrum(BaseModel):
     assigned_by = relationship(
         'Employee',
         foreign_keys=[assigned_by_id]
+    )
+    applicant = relationship(
+        'Company',
+        foreign_keys=[applicant_id]
     )
 
     def save_spectrum(self):
@@ -56,4 +61,5 @@ class Spectrum(BaseModel):
         ''' Check if spectrum exists '''
         return True if Spectrum.query.filter_by(
             assigned_stl_location=self.assigned_stl_location,
+            applicant=self.applicant,
             active=True).first() else False

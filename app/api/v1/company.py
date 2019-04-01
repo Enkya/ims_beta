@@ -112,15 +112,17 @@ class CompaniesEndPoint(Resource):
         ''' Create a company '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
-        district = arguments.get('district').strip() or ''
-        postal = arguments.get('postal').strip() or ''
-        country = arguments.get('country').strip() or ''
-        tech_person_name_string = arguments.get('techPersonName').strip() or ''
-        tech_person_email = arguments.get('techPersonEmail').strip() or ''
-        address_line_1 = arguments.get('address1').strip() or ''
-        address_line_2 = arguments.get('address2').strip() or ''
-        legal_person_name_str = arguments.get('legalPersonName').strip() or ''
-        legal_person_email = arguments.get('legalPersonEmail').strip() or ''
+        district = arguments.get('district').strip() or None
+        postal = arguments.get('postal').strip() or None
+        country = arguments.get('country').strip() or None
+        tech_person_name_string = arguments.get(
+            'techPersonName').strip() or None
+        tech_person_email = arguments.get('techPersonEmail').strip() or None
+        address_line_1 = arguments.get('address1').strip() or None
+        address_line_2 = arguments.get('address2').strip() or None
+        legal_person_name_str = arguments.get(
+            'legalPersonName').strip() or None
+        legal_person_email = arguments.get('legalPersonEmail').strip() or None
         tech_person_name = tech_person_name_string.split()
         legal_person_name = legal_person_name_str.split()
 

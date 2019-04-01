@@ -93,10 +93,10 @@ class DepartmentsEndPoint(Resource):
         ''' Create an department '''
         arguments = request.get_json(force=True)
         name = arguments.get('name').strip()
-        description = arguments.get('description').strip() or ''
+        description = arguments.get('description').strip() or None
         size = arguments.get('size').strip()
         size = int(size, 10)
-        permissions = arguments.get('permissions').strip() or ''
+        permissions = arguments.get('permissions').strip() or None
 
         if not name:
             return abort(400, 'Name cannot be empty!')

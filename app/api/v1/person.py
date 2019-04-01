@@ -27,7 +27,9 @@ person_fields = person_api.model(
             description="Person Full Name",
             example="John Smith",
         ),
-        'date_created': fields.DateTime(required=False, attribute='date_created'),
+        'date_created': fields.DateTime(
+            required=False,
+            attribute='date_created'),
     }
 )
 
@@ -69,17 +71,20 @@ class PeopleEndPoint(Resource):
             }
 
             if page == 1:
-                pages['prev_page'] = url_for('api.person')+'?limit={}'.format(page_limit)
+                pages['prev_page'] = url_for('api.person') + \
+                    '?limit={}'.format(page_limit)
 
             if page > 1:
-                pages['prev_page'] = url_for('api.person')+'?limit={}&page={}'.format(page_limit, page-1)
+                pages['prev_page'] = url_for('api.person') + \
+                    '?limit={}&page={}'.format(page_limit, page-1)
 
             if page < person_paged.pages:
-                pages['next_page'] = url_for('api.person')+'?limit={}&page={}'.format(page_limit, page+1)
+                pages['next_page'] = url_for('api.person') + \
+                    '?limit={}&page={}'.format(page_limit, page+1)
 
             results.update(pages)
             return results, 200
-        return abort(404, message='No people found for specified user') 
+        return abort(404, message='No people found for specified user')
 
     @person_api.response(201, 'Person created successfully!')
     @person_api.response(409, 'Person already exists!')
@@ -136,8 +141,10 @@ class SinglePersonEndpoint(Resource):
             person.save()
             return person, 200
         else:
-            abort(404, message='Person with id {} not found or not yours.'.format(
-                person_id))
+            abort(
+                404,
+                message='Person with id {} not found or not yours.'.format(
+                    person_id))
 
     @person_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
@@ -150,8 +157,9 @@ class SinglePersonEndpoint(Resource):
         if person:
             if person.delete_person():
                 response = {
-                    'message': 'Person with id {} successfully deleted.'.format(person_id)}
+                    'message': 'Person with id {} deleted.'.format(person_id)}
             return response, 200
         else:
-            abort(404, message='Person with id {} not found or not yours.'.format(
-                person_id))
+            abort(
+                404,
+                message='Person with id {} not found.'.format(person_id))

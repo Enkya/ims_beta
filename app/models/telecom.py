@@ -8,7 +8,7 @@ class Telecom(BaseModel):
     __tablename__ = 'telecom'
     service_details = db.Column(db.String(255))
     service_technology = db.Column(db.String(255))
-    qos_requirements_claims_status = db.Column(db.String(255))
+    qos_reqs_claims_status = db.Column(db.String(255))
     coverage_area_details = db.Column(db.String(255))
     sharing_requirements = db.Column(db.String(255))
     protection_status = db.Column(db.String(255))
@@ -22,13 +22,14 @@ class Telecom(BaseModel):
     report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     approved_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    inspected_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
     outage_report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[outage_report_id]
     )
     report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[report_id]
     )
     inspected_by = relationship(
@@ -38,6 +39,10 @@ class Telecom(BaseModel):
     reviewed_by = relationship(
         'Employee',
         foreign_keys=[reviewed_by_id]
+    )
+    approved_by = relationship(
+        'Employee',
+        foreign_keys=[approved_by_id]
     )
 
     def save_telecom(self):

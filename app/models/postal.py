@@ -11,10 +11,10 @@ class Postal(BaseModel):
     license_validity = db.Column(db.Integer)
     postal_article_confidentiality = db.Column(db.Integer)
     training_requirements = db.Column(db.Boolean)
-    qos_requirements_working_days = db.Column(db.Boolean)
-    qos_requirements_claims_policy = db.Column(db.Boolean)
-    qos_requirements_control_prohibited_items = db.Column(db.Boolean)
-    qos_requirements_complaints_register = db.Column(db.Boolean)
+    qos_reqs_working_days = db.Column(db.Boolean)
+    qos_reqs_claims_policy = db.Column(db.Boolean)
+    qos_reqs_ctrl_prohibit_items = db.Column(db.Boolean)
+    qos_reqs_complaints_register = db.Column(db.Boolean)
     notes_01 = db.Column(db.String(255))
     notes_02 = db.Column(db.String(255))
     recommendations = db.Column(db.String(255))
@@ -24,7 +24,7 @@ class Postal(BaseModel):
     approved_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
     report = relationship(
-        'Report',
+        'ResourceMeta',
         foreign_keys=[report_id]
     )
     inspected_by = relationship(
