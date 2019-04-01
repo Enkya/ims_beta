@@ -14,10 +14,6 @@ from datetime import datetime
 telecom_api = Namespace(
     'telecom', description='A telecom creation namespace')
 
-service_provider_fields = {
-    'name': fields.String(required=False, attribute='service_provider.name')
-}
-
 telecom_fields = telecom_api.model(
     'Telecom',
     {
@@ -28,7 +24,7 @@ telecom_fields = telecom_api.model(
         'applicableServiceType': fields.String(
             attribute='applicable_service_type'),
         'qosRequirementsClaimsStatus': fields.String(
-            attribute='qos_requirements_claims_status'),
+            attribute='qos_reqs_claims_status'),
         'coverageAreaDetails': fields.String(
             attribute='coverage_area_details'),
         'sharingRequirements': fields.String(attribute='sharing_requirements'),
@@ -123,7 +119,7 @@ class TelecomEndPoint(Resource):
         arguments = request.get_json(force=True)
         service_details = arguments.get('serviceDetails').strip() or None
         service_technology = arguments.get('serviceTechnology').strip() or None
-        qos_requirements_claims_status = arguments.get(
+        qos_reqs_claims_status = arguments.get(
             'qosRequirementsClaimsStatus').strip() or None
         coverage_area_details = arguments.get(
             'coverageAreaDetails').strip() or None
@@ -166,7 +162,7 @@ class TelecomEndPoint(Resource):
             telecom = Telecom(
                 service_details=service_details,
                 service_technology=service_technology,
-                qos_requirements_claims_status=qos_requirements_claims_status,
+                qos_reqs_claims_status=qos_reqs_claims_status,
                 coverage_area_details=coverage_area_details,
                 sharing_requirements=sharing_requirements,
                 protection_status=protection_status,

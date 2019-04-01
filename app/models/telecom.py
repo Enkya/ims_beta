@@ -8,7 +8,7 @@ class Telecom(BaseModel):
     __tablename__ = 'telecom'
     service_details = db.Column(db.String(255))
     service_technology = db.Column(db.String(255))
-    qos_requirements_claims_status = db.Column(db.String(255))
+    qos_reqs_claims_status = db.Column(db.String(255))
     coverage_area_details = db.Column(db.String(255))
     sharing_requirements = db.Column(db.String(255))
     protection_status = db.Column(db.String(255))
