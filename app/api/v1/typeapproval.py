@@ -3,10 +3,13 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.company import Company
+from app.models.employee import Employee
+from app.models.uniqueId import UniqueId
 from app.models.resource import ResourceMeta
 from app.models.typeapproval import Typeapproval
 from app.utils.utilities import auth
 from instance.config import Config
+from datetime import datetime
 
 
 typeapproval_api = Namespace(
@@ -18,8 +21,33 @@ typeapproval_fields = typeapproval_api.model(
         'id': fields.Integer(),
         'taUniqueId': fields.String(
             required=True,
-            attribute='ta_unique_id'),
-        'status_approved': fields.Boolean(attribute='status_approved'),
+            attribute='ta_unique_id.value'),
+        'equipmentCategory': fields.String(
+            required=False,
+            attribute='equipment_category'),
+        'equipmentModel': fields.String(
+            required=False,
+            attribute='equipment_model'),
+        'equipmentName': fields.String(
+            required=False,
+            attribute='equipment_name'),
+        'equipmentDesc': fields.String(
+            required=False,
+            attribute='equipment_desc'),
+        'statusApproved': fields.Boolean(attribute='status_approved'),
+        'applicableStandards': fields.String(
+            required=False, attribute='applicable_standards'),
+        'approvalRejectionDate': fields.DateTime(
+            required=False,
+            attribute='approval_rejection_date'),
+        'applicant': fields.String(required=False, attribute='applicant.name'),
+        'assessedBy': fields.String(
+            required=False,
+            attribute='employee.contact_person.person.full_name'),
+        'report': fields.String(required=False, attribute='report.full_name'),
+        'taCertificate': fields.String(
+            required=False,
+            attribute='ta_certificate.full_name'),
         'date_created': fields.DateTime(
             required=False,
             attribute='date_created'),
@@ -94,9 +122,25 @@ class TypeapprovalEndPoint(Resource):
     def post(self):
         ''' Create a typeapproval resource'''
         arguments = request.get_json(force=True)
+        ta_unique_id = (arguments.get('taUniqueId') or '').strip()
         status_approved = arguments.get('statusApproved') or False
-        applicant_id = int(arguments.get('applicant').strip())
-        report_url = arguments.get('report').strip() or ''
+        equipment_category = (
+            arguments.get('equipmentCategory') or '').strip()
+        equipment_name = (arguments.get('equipmentName') or '').strip()
+        equipment_model = (arguments.get('equipmentModel') or '').strip()
+        equipment_desc = (arguments.get('equipmentDesc') or '').strip()
+        applicable_standards = (
+            arguments.get('applicableStandards') or '').strip()
+        approval_rejection_date = (
+            arguments.get('approvalRejectionDate') or '').strip()
+        approval_rejection_date = datetime.strptime(
+            approval_rejection_date, '%d-%m-%y'
+        )
+        ta_certificate_id = (
+            arguments.get('taCertificateID') or '').strip()
+        assessed_by_id = (arguments.get('assessedBy') or '').strip()
+        applicant_id = int((arguments.get('applicant') or 0).strip())
+        report_url = (arguments.get('report') or '').strip()
 
         try:
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
@@ -108,8 +152,20 @@ class TypeapprovalEndPoint(Resource):
             applicant = Company.query.filter_by(
                 id=applicant_id,
                 active=True).first()
+            assessed_by = Employee.query.filter_by(id=assessed_by_id).first()
+            ta_certificate = ResourceMeta.query.filter_by(
+                id=ta_certificate_id).first()
             typeapproval = Typeapproval(
+                ta_unique_id=ta_unique_id,
                 status_approved=status_approved,
+                equipment_category=equipment_category,
+                equipment_name=equipment_name,
+                equipment_model=equipment_model,
+                equipment_desc=equipment_desc,
+                applicable_standards=applicable_standards,
+                approval_rejection_date=approval_rejection_date,
+                assessed_by=assessed_by,
+                ta_certificate=ta_certificate,
                 applicant=applicant,
                 report=report
                 )

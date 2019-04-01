@@ -6,7 +6,6 @@ class Typeapproval(BaseModel):
     ''' This class represents the typeapproval modal '''
 
     __tablename__ = 'typeapproval'
-    ta_unique_id = db.Column(db.String(255), unique=True)
     equipment_category = db.Column(db.String(255))
     status_approved = db.Column(db.Boolean)
     equipment_name = db.Column(db.String(255))
@@ -14,10 +13,11 @@ class Typeapproval(BaseModel):
     equipment_desc = db.Column(db.String(255))
     applicable_standards = db.Column(db.String(255))
     approval_rejection_date = db.Column(db.DateTime)
+    ta_unique_id = db.Column(db.String(255))
     ta_certificate_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     report_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
     assessed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
-    applicant_id = db.Column(db.Integer, db.ForeignKey('contact_person.id'))
+    applicant_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     ta_certificate = relationship(
         'ResourceMeta',
@@ -32,7 +32,7 @@ class Typeapproval(BaseModel):
         foreign_keys=[assessed_by_id]
     )
     applicant = relationship(
-        'ContactPerson',
+        'Company',
         foreign_keys=[applicant_id]
     )
 
@@ -57,5 +57,5 @@ class Typeapproval(BaseModel):
     def exists(self):
         ''' Check if typeapproval exists '''
         return True if Typeapproval.query.filter_by(
-            ta_unique_id=self.ta_unique_id,
-            active=True).first() else False
+            applicant=self.applicant,
+            equipment_name=self.equipment_name).first() else False
