@@ -15,22 +15,28 @@ from instance.config import Config
 company_api = Namespace(
     'companies', description='A company creation namespace')
 
-address_fields = {
-    'district': fields.String(required=False, attribute='district'),
-    'postal': fields.String(required=False, attribute='postal_code'),
-    'country': fields.String(required=False, attribute='country'),
-    'address_line_1': fields.String(required=True, attribute='address_line_1'),
-    'address_line_2': fields.String(required=True, attribute='address_line_2'),
-}
+address_fields = company_api.model(
+    'address',
+    {
+        'district': fields.String(required=False, attribute='district'),
+        'postal': fields.String(required=False, attribute='postal_code'),
+        'country': fields.String(required=False, attribute='country'),
+        'address_line_1': fields.String(
+            required=True,
+            attribute='address_line_1'),
+        'address_line_2': fields.String(
+            required=True,
+            attribute='address_line_2'),
+    }
+)
 
-person_fields = {
-    'full_name': fields.String(required=True, attribute='full_name')
-}
-
-contact_people_fields = {
-    'email': fields.String(required=True, attribute='contact.email'),
-    'person': fields.String(required=True, attribute='person.full_name')
-}
+contact_people_fields = company_api.model(
+    'contact_people',
+    {
+        'email': fields.String(required=True, attribute='contact.email'),
+        'person': fields.String(required=True, attribute='person.full_name')
+    }
+)
 
 company_fields = company_api.model(
     'Company',
