@@ -14,9 +14,12 @@ from datetime import datetime
 numbering_api = Namespace(
     'numbering', description='A numbering creation namespace')
 
-service_provider_fields = {
-    'name': fields.String(required=False, attribute='service_provider.name')
-}
+service_provider_fields = numbering_api.model(
+    'service_provider',
+    {
+        'name': fields.String(required=False, attribute='service_provider.name')
+    }
+)
 
 numbering_fields = numbering_api.model(
     'Numbering',

@@ -26,8 +26,11 @@ bcrypt = Bcrypt()
 # Create v1 blueprint for api
 api_v1 = Blueprint('api', __name__, url_prefix='/api/v1')
 
-api = Api(api_v1, version='1.0', title='TBD',
-          description='TBD')
+api = Api(
+    api_v1,
+    version='1.0',
+    title='IMS',
+    description='Description of available endpoints for the ECI IMS System')
 
 api.add_namespace(company_api)
 api.add_namespace(address_api)
