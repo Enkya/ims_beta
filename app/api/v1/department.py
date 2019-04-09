@@ -120,7 +120,7 @@ class DepartmentsEndPoint(Resource):
 @department_api.route('/<int:department_id>', endpoint='single_department')
 class SingleDepartmentEndpoint(Resource):
 
-    @department_api.header('x-access-token', 'Access Token', required=True)
+    # @department_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(department_fields)
     @department_api.response(200, 'Successful retrieval of department')
     @department_api.response(400, 'No department found with specified ID')
@@ -132,7 +132,7 @@ class SingleDepartmentEndpoint(Resource):
             return department, 200
         abort(404, message='No department found with specified ID')
 
-    @department_api.header('x-access-token', 'Access Token', required=True)
+    # @department_api.header('x-access-token', 'Access Token', required=True)
     @department_api.response(200, 'Successfully Updated Department')
     @department_api.response(400, 'Department with id {} not found.')
     @department_api.marshal_with(department_fields)
@@ -153,7 +153,7 @@ class SingleDepartmentEndpoint(Resource):
                 message='Department with id {} not found'.format(department_id)
             )
 
-    @department_api.header('x-access-token', 'Access Token', required=True)
+    # @department_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @department_api.response(200, 'Department with id {} successfully deleted')
     @department_api.response(400, 'Department with id {} not found')

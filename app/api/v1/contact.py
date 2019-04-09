@@ -118,7 +118,7 @@ class ContactsEndPoint(Resource):
 @contact_api.route('/<int:contact_id>', endpoint='single_contact')
 class SingleContactEndpoint(Resource):
 
-    @contact_api.header('x-access-token', 'Access Token', required=True)
+    # @contact_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(contact_fields)
     @contact_api.response(200, 'Successful retrieval of contact')
     @contact_api.response(400, 'No contact found with specified ID')
@@ -130,7 +130,7 @@ class SingleContactEndpoint(Resource):
             return contact, 200
         abort(404, message='No contact found with specified ID')
 
-    @contact_api.header('x-access-token', 'Access Token', required=True)
+    # @contact_api.header('x-access-token', 'Access Token', required=True)
     @contact_api.response(200, 'Successfully Updated Contact')
     @contact_api.response(400, 'Contact with id {} not found or not yours.')
     @contact_api.marshal_with(contact_fields)
@@ -151,7 +151,7 @@ class SingleContactEndpoint(Resource):
                 message='Contact with id {} not found'.format(contact_id)
             )
 
-    @contact_api.header('x-access-token', 'Access Token', required=True)
+    # @contact_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @contact_api.response(200, 'Contact with id {} successfully deleted.')
     @contact_api.response(400, 'Contact with id {} not found or not yours.')

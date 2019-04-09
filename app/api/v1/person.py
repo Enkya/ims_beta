@@ -113,7 +113,7 @@ class PeopleEndPoint(Resource):
 @person_api.route('/<int:person_id>', endpoint='single_person')
 class SinglePersonEndpoint(Resource):
 
-    @person_api.header('x-access-token', 'Access Token', required=True)
+    # @person_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(person_fields)
     @person_api.response(200, 'Successful retrieval of person')
     @person_api.response(400, 'No person found with specified ID')
@@ -125,7 +125,7 @@ class SinglePersonEndpoint(Resource):
             return person, 200
         abort(404, message='No person found with specified ID')
 
-    @person_api.header('x-access-token', 'Access Token', required=True)
+    # @person_api.header('x-access-token', 'Access Token', required=True)
     @person_api.response(200, 'Successfully Updated Person')
     @person_api.response(400, 'Person with id {} not found or not yours.')
     @person_api.marshal_with(person_fields)
@@ -146,7 +146,7 @@ class SinglePersonEndpoint(Resource):
                 message='Person with id {} not found or not yours.'.format(
                     person_id))
 
-    @person_api.header('x-access-token', 'Access Token', required=True)
+    # @person_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @person_api.response(200, 'Person with id {} successfully deleted.')
     @person_api.response(400, 'Person with id {} not found or not yours.')

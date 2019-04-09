@@ -17,7 +17,7 @@ numbering_api = Namespace(
 service_provider_fields = numbering_api.model(
     'service_provider',
     {
-        'name': fields.String(required=False, attribute='service_provider.name')
+        'name': fields.String(attribute='service_provider.name')
     }
 )
 
@@ -179,7 +179,7 @@ class NumberingEndPoint(Resource):
 @numbering_api.route('/<int:numbering_id>', endpoint='single_numbering')
 class SingleNumberingEndpoint(Resource):
 
-    @numbering_api.header('x-access-token', 'Access Token', required=True)
+    # @numbering_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(numbering_fields)
     @numbering_api.response(200, 'Successful retrieval of numbering')
     @numbering_api.response(400, 'No numbering found with specified ID')
@@ -191,7 +191,7 @@ class SingleNumberingEndpoint(Resource):
             return numbering, 200
         abort(404, message='No numbering found with specified ID')
 
-    @numbering_api.header('x-access-token', 'Access Token', required=True)
+    # @numbering_api.header('x-access-token', 'Access Token', required=True)
     @numbering_api.response(200, 'Successfully Updated Numbering')
     @numbering_api.response(
         400,
@@ -213,7 +213,7 @@ class SingleNumberingEndpoint(Resource):
                 404,
                 message='Numbering with id {} not found'.format(numbering_id))
 
-    @numbering_api.header('x-access-token', 'Access Token', required=True)
+    # @numbering_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @numbering_api.response(200, 'Numbering with id {} successfully deleted.')
     @numbering_api.response(

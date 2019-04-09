@@ -142,7 +142,7 @@ class EmployeesEndPoint(Resource):
 @employee_api.route('/<int:employee_id>', endpoint='single_employee')
 class SingleEmployeeEndpoint(Resource):
 
-    @employee_api.header('x-access-token', 'Access Token', required=True)
+    # @employee_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(employee_fields)
     @employee_api.response(200, 'Successful retrieval of employee')
     @employee_api.response(400, 'No employee found with specified ID')
@@ -154,7 +154,7 @@ class SingleEmployeeEndpoint(Resource):
             return employee, 200
         abort(404, message='No employee found with specified ID')
 
-    @employee_api.header('x-access-token', 'Access Token', required=True)
+    # @employee_api.header('x-access-token', 'Access Token', required=True)
     @employee_api.response(200, 'Successfully Updated Employee')
     @employee_api.response(400, 'Employee with id {} not found or not yours.')
     @employee_api.marshal_with(employee_fields)
@@ -174,7 +174,7 @@ class SingleEmployeeEndpoint(Resource):
                 404,
                 message='Employee with id {} not found'.format(employee_id))
 
-    @employee_api.header('x-access-token', 'Access Token', required=True)
+    # @employee_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @employee_api.response(200, 'Employee with id {} successfully deleted.')
     @employee_api.response(400, 'Employee with id {} not found or not yours.')

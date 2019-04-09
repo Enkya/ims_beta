@@ -201,7 +201,7 @@ class SpectrumEndPoint(Resource):
     endpoint='single_spectrum')
 class SingleSpectrumEndpoint(Resource):
 
-    @spectrum_api.header('x-access-token', 'Access Token', required=True)
+    # @spectrum_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(spectrum_fields)
     @spectrum_api.response(200, 'Successful retrieval of spectrum')
     @spectrum_api.response(400, 'No spectrum found with specified ID')
@@ -213,7 +213,7 @@ class SingleSpectrumEndpoint(Resource):
             return spectrum, 200
         abort(404, message='No spectrum found with specified ID')
 
-    @spectrum_api.header('x-access-token', 'Access Token', required=True)
+    # @spectrum_api.header('x-access-token', 'Access Token', required=True)
     @spectrum_api.response(200, 'Successfully Updated Spectrum')
     @spectrum_api.response(
         400,
@@ -236,7 +236,7 @@ class SingleSpectrumEndpoint(Resource):
                 message='Spectrum with id {} not found'.format(
                     spectrum_id))
 
-    @spectrum_api.header('x-access-token', 'Access Token', required=True)
+    # @spectrum_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @spectrum_api.response(
         200, 'Spectrum with id {} successfully deleted.')
