@@ -22,6 +22,7 @@ class Postal(BaseModel):
     inspected_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     approved_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     report = relationship(
         'ResourceMeta',
@@ -38,6 +39,10 @@ class Postal(BaseModel):
     approved_by = relationship(
         'Employee',
         foreign_keys=[approved_by_id]
+    )
+    company = relationship(
+        'Company',
+        foreign_keys=[company_id]
     )
 
     def save_postal(self):

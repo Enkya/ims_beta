@@ -2,14 +2,27 @@ from flask import request, jsonify, g, url_for
 from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
+
 from app.models.company import Company
 from app.models.address import Address
 from app.models.person import Person
 from app.models.contact import Contact
 from app.models.contact_person import ContactPerson
 from app.models.user import User
+from app.models.numbering import Numbering
+from app.models.postal import Postal
+from app.models.spectrum import Spectrum
+from app.models.telecom import Telecom
+from app.models.typeapproval import Typeapproval
+
 from app.utils.utilities import auth
 from instance.config import Config
+
+from .numbering import numbering_fields
+from .postal import postal_fields
+from .spectrum import spectrum_fields
+from .telecom import telecom_fields
+from .typeapproval import typeapproval_fields
 
 
 company_api = Namespace(
@@ -55,6 +68,18 @@ company_fields = company_api.model(
         'date_modified': fields.DateTime(
             required=False,
             attribute='date_modified'),
+    }
+)
+
+single_company_fields = company_api.model(
+    'Single Company',
+    {
+        'company': fields.Nested(company_fields),
+        'numbering': fields.Nested(numbering_fields),
+        'postal': fields.Nested(postal_fields),
+        'spectrum': fields.Nested(spectrum_fields),
+        'telecom': fields.Nested(telecom_fields),
+        'typeapproval': fields.Nested(typeapproval_fields),
     }
 )
 
@@ -194,19 +219,46 @@ class CompaniesEndPoint(Resource):
 @company_api.route('/<int:company_id>', endpoint='single_company')
 class SingleCompanyEndpoint(Resource):
 
-    @company_api.header('x-access-token', 'Access Token', required=True)
-    @marshal_with(company_fields)
+    # @company_api.header('x-access-token', 'Access Token', required=True)
+    @marshal_with(single_company_fields)
     @company_api.response(200, 'Successful retrieval of company')
     @company_api.response(400, 'No company found with specified ID')
     def get(self, company_id):
         ''' Retrieve individual company with given company_id '''
         company = Company.query.filter_by(
             id=company_id, active=True).first()
+        data = {}
         if company:
-            return company, 200
+            data['company'] = company
+        numbering = Numbering.query.filter_by(
+            service_provider=company, active=True).\
+            order_by(desc(Numbering.date_created))
+        if numbering.all():
+            data['numbering'] = numbering
+        spectrum = Spectrum.query.filter_by(
+            applicant=company, active=True).\
+            order_by(desc(Spectrum.date_created))
+        if spectrum.all():
+            data['spectrum'] = spectrum
+        postal = Postal.query.filter_by(
+            company=company, active=True).\
+            order_by(desc(Postal.date_created))
+        if postal.all():
+            data['postal'] = postal
+        telecom = Telecom.query.filter_by(
+            company=company, active=True).\
+            order_by(desc(Telecom.date_created))
+        if telecom.all():
+            data['telecom'] = telecom
+        typeapproval = Typeapproval.query.filter_by(
+            applicant=company, active=True).\
+            order_by(desc(Typeapproval.date_created))
+        if typeapproval.all():
+            data['typeapproval'] = typeapproval
+        return data, 200
         abort(404, message='No company found with specified ID')
 
-    @company_api.header('x-access-token', 'Access Token', required=True)
+    # @company_api.header('x-access-token', 'Access Token', required=True)
     @company_api.response(200, 'Successfully Updated Company')
     @company_api.response(400, 'Company with id {} not found or not yours.')
     @company_api.marshal_with(company_fields)

@@ -23,6 +23,7 @@ class Telecom(BaseModel):
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     approved_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     inspected_by_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     outage_report = relationship(
         'ResourceMeta',
@@ -43,6 +44,10 @@ class Telecom(BaseModel):
     approved_by = relationship(
         'Employee',
         foreign_keys=[approved_by_id]
+    )
+    company = relationship(
+        'Company',
+        foreign_keys=[company_id]
     )
 
     def save_telecom(self):
