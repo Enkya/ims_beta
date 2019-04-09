@@ -47,6 +47,7 @@ postal_fields = postal_api.model(
         'inspectedBy': fields.String(
             attribute='inspected_by.contact_person.person.full_name'),
         'report': fields.String(attribute='report.full_name'),
+        'company': fields.String(attribute='company.name'),
         'date_created': fields.DateTime(
             required=False,
             attribute='date_created'),
@@ -143,8 +144,12 @@ class PostalEndPoint(Resource):
         approved_by_id = arguments.get('approvedBy').strip() or None
         inspected_by_id = arguments.get('inspectedBy').strip() or None
         report_url = arguments.get('report').strip() or None
+        company_id = int(arguments.get('company').strip()) or None
 
         try:
+            company = Company.query.filter_by(
+                id=company_id,
+                active=True).first()
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
             if not report:
                 report = ResourceMeta(
@@ -156,6 +161,7 @@ class PostalEndPoint(Resource):
             inspected_by = Employee.query.filter_by(id=inspected_by_id).first()
 
             postal = Postal(
+                company=company,
                 call_sign=call_sign,
                 physical_location_requirements=physical_location_requirements,
                 license_validity=license_validity,
@@ -186,7 +192,7 @@ class PostalEndPoint(Resource):
 @postal_api.route('/<int:postal_id>', endpoint='single_postal')
 class SinglePostalEndpoint(Resource):
 
-    @postal_api.header('x-access-token', 'Access Token', required=True)
+    # @postal_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(postal_fields)
     @postal_api.response(200, 'Successful retrieval of postal')
     @postal_api.response(400, 'No postal found with specified ID')
@@ -198,7 +204,7 @@ class SinglePostalEndpoint(Resource):
             return postal, 200
         abort(404, message='No postal found with specified ID')
 
-    @postal_api.header('x-access-token', 'Access Token', required=True)
+    # @postal_api.header('x-access-token', 'Access Token', required=True)
     @postal_api.response(200, 'Successfully Updated Postal')
     @postal_api.response(
         400,
@@ -220,7 +226,7 @@ class SinglePostalEndpoint(Resource):
                 404,
                 message='Postal with id {} not found'.format(postal_id))
 
-    @postal_api.header('x-access-token', 'Access Token', required=True)
+    # @postal_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @postal_api.response(200, 'Postal with id {} successfully deleted.')
     @postal_api.response(

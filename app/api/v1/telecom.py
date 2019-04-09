@@ -45,6 +45,7 @@ telecom_fields = telecom_api.model(
             attribute='inspected_by.contact_person.person.full_name'),
         'report': fields.String(attribute='report.full_name'),
         'outageReport': fields.String(attribute='outage_report.full_name'),
+        'company': fields.String(attribute='company.name'),
         'date_created': fields.DateTime(
             required=False,
             attribute='date_created'),
@@ -140,8 +141,12 @@ class TelecomEndPoint(Resource):
         inspected_by_id = arguments.get('inspectedBy').strip() or None
         report_url = arguments.get('report').strip() or None
         outage_report_url = arguments.get('outageReport').strip() or None
+        company_id = int(arguments.get('company').strip()) or None
 
         try:
+            company = Company.query.filter_by(
+                id=company_id,
+                active=True).first()
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
             if not report:
                 report = ResourceMeta(
@@ -160,6 +165,7 @@ class TelecomEndPoint(Resource):
             inspected_by = Employee.query.filter_by(id=inspected_by_id).first()
 
             telecom = Telecom(
+                company=company,
                 service_details=service_details,
                 service_technology=service_technology,
                 qos_reqs_claims_status=qos_reqs_claims_status,
@@ -190,7 +196,7 @@ class TelecomEndPoint(Resource):
 @telecom_api.route('/<int:telecom_id>', endpoint='single_telecom')
 class SingleTelecomEndpoint(Resource):
 
-    @telecom_api.header('x-access-token', 'Access Token', required=True)
+    # @telecom_api.header('x-access-token', 'Access Token', required=True)
     @marshal_with(telecom_fields)
     @telecom_api.response(200, 'Successful retrieval of telecom')
     @telecom_api.response(400, 'No telecom found with specified ID')
@@ -202,7 +208,7 @@ class SingleTelecomEndpoint(Resource):
             return telecom, 200
         abort(404, message='No telecom found with specified ID')
 
-    @telecom_api.header('x-access-token', 'Access Token', required=True)
+    # @telecom_api.header('x-access-token', 'Access Token', required=True)
     @telecom_api.response(200, 'Successfully Updated Telecom')
     @telecom_api.response(
         400,
@@ -224,7 +230,7 @@ class SingleTelecomEndpoint(Resource):
                 404,
                 message='Telecom with id {} not found'.format(telecom_id))
 
-    @telecom_api.header('x-access-token', 'Access Token', required=True)
+    # @telecom_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
     @telecom_api.response(200, 'Telecom with id {} successfully deleted.')
     @telecom_api.response(
