@@ -234,27 +234,27 @@ class SingleCompanyEndpoint(Resource):
             service_provider=company, active=True).\
             order_by(desc(Numbering.date_created))
         if numbering.all():
-            data['numbering'] = numbering
+            data['numbering'] = numbering.all()
         spectrum = Spectrum.query.filter_by(
             applicant=company, active=True).\
             order_by(desc(Spectrum.date_created))
         if spectrum.all():
-            data['spectrum'] = spectrum
+            data['spectrum'] = spectrum.all()
         postal = Postal.query.filter_by(
             company=company, active=True).\
             order_by(desc(Postal.date_created))
         if postal.all():
-            data['postal'] = postal
+            data['postal'] = postal.all()
         telecom = Telecom.query.filter_by(
             company=company, active=True).\
             order_by(desc(Telecom.date_created))
         if telecom.all():
-            data['telecom'] = telecom
+            data['telecom'] = telecom.all()
         typeapproval = Typeapproval.query.filter_by(
             applicant=company, active=True).\
             order_by(desc(Typeapproval.date_created))
         if typeapproval.all():
-            data['typeapproval'] = typeapproval
+            data['typeapproval'] = typeapproval.all()
         return data, 200
         abort(404, message='No company found with specified ID')
 
