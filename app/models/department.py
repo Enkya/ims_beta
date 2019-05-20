@@ -19,6 +19,17 @@ class Department(BaseModel):
             return True
         return False
 
+    def delete_department(self, deep_delete=False):
+        ''' Method to delete department '''
+        if not deep_delete:
+            if self.deactivate():
+                return True
+            return False
+        if self.exists():
+            self.delete()
+            return True
+        return False
+
     def exists(self):
         ''' Check if department exists '''
         return True if Department.query.filter_by(

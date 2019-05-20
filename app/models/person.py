@@ -35,3 +35,14 @@ class Person(BaseModel):
 
     def __str__(self):
         return '{0}'.format(self.full_name)
+
+    def delete_person(self, deep_delete=False):
+        ''' Method to delete person '''
+        if not deep_delete:
+            if self.deactivate():
+                return True
+            return False
+        if self.exists():
+            self.delete()
+            return True
+        return False
