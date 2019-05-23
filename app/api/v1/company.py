@@ -229,7 +229,7 @@ class SingleCompanyEndpoint(Resource):
             id=company_id, active=True).first()
         data = {}
         if company:
-            data['company'] = company
+            data['company'] = [company]
         numbering = Numbering.query.filter_by(
             service_provider=company, active=True).\
             order_by(desc(Numbering.date_created))
@@ -278,8 +278,8 @@ class SingleCompanyEndpoint(Resource):
                 404,
                 message='Company with id {} not found'.format(company_id))
 
-    @company_api.header('x-access-token', 'Access Token', required=True)
-    @auth.login_required
+    # @company_api.header('x-access-token', 'Access Token', required=True)
+    # @auth.login_required
     @company_api.response(200, 'Company with id {} successfully deleted.')
     @company_api.response(400, 'Company with id {} not found or not yours.')
     def delete(self, company_id):
