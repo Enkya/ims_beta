@@ -228,33 +228,32 @@ class SingleCompanyEndpoint(Resource):
         company = Company.query.filter_by(
             id=company_id, active=True).first()
         data = {}
-        if company:
-            data['company'] = [company]
+        # make company response an array for consistency since
+        # first() returns object
+        data['company'] = [company]
         numbering = Numbering.query.filter_by(
             service_provider=company, active=True).\
             order_by(desc(Numbering.date_created))
-        if numbering.all():
-            data['numbering'] = numbering.all()
+        # all() will return empty object.
+        # If marshalled null fields need to be returned,
+        # only update the data array when all finds something
+        data['numbering'] = numbering.all()
         spectrum = Spectrum.query.filter_by(
             applicant=company, active=True).\
             order_by(desc(Spectrum.date_created))
-        if spectrum.all():
-            data['spectrum'] = spectrum.all()
+        data['spectrum'] = spectrum.all()
         postal = Postal.query.filter_by(
             company=company, active=True).\
             order_by(desc(Postal.date_created))
-        if postal.all():
-            data['postal'] = postal.all()
+        data['postal'] = postal.all()
         telecom = Telecom.query.filter_by(
             company=company, active=True).\
             order_by(desc(Telecom.date_created))
-        if telecom.all():
-            data['telecom'] = telecom.all()
+        data['telecom'] = telecom.all()
         typeapproval = Typeapproval.query.filter_by(
             applicant=company, active=True).\
             order_by(desc(Typeapproval.date_created))
-        if typeapproval.all():
-            data['typeapproval'] = typeapproval.all()
+        data['typeapproval'] = typeapproval.all()
         return data, 200
         abort(404, message='No company found with specified ID')
 
