@@ -13,6 +13,10 @@ class BaseModel(db.Model):
         onupdate=db.func.current_timestamp())
     active = db.Column(db.Boolean, default=True)
 
+    def __init__(self, *args):
+        for k, v in args[0].items():
+            setattr(self, k, v)
+
     def delete(self):
         '''delete data from database'''
         db.session.delete(self)

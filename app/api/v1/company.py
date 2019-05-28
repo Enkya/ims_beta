@@ -15,7 +15,7 @@ from app.models.spectrum import Spectrum
 from app.models.telecom import Telecom
 from app.models.typeapproval import Typeapproval
 
-from app.utils.utilities import auth
+from app.utils.utilities import auth, load_json_data, updateObject
 from instance.config import Config
 
 from .numbering import numbering_fields
@@ -23,6 +23,8 @@ from .postal import postal_fields
 from .spectrum import spectrum_fields
 from .telecom import telecom_fields
 from .typeapproval import typeapproval_fields
+
+import os
 
 
 company_api = Namespace(
@@ -142,35 +144,43 @@ class CompaniesEndPoint(Resource):
     def post(self):
         ''' Create a company '''
         arguments = request.get_json(force=True)
-        name = arguments.get('name').strip()
-        district = arguments.get('district').strip() or None
-        postal = arguments.get('postal').strip() or None
-        country = arguments.get('country').strip() or None
-        tech_person_name_string = arguments.get(
-            'techPersonName').strip() or None
-        tech_person_email = arguments.get('techPersonEmail').strip() or None
-        address_line_1 = arguments.get('address1').strip() or None
-        address_line_2 = arguments.get('address2').strip() or None
-        legal_person_name_str = arguments.get(
-            'legalPersonName').strip() or None
-        legal_person_email = arguments.get('legalPersonEmail').strip() or None
-        tech_person_name = tech_person_name_string.split()
-        legal_person_name = legal_person_name_str.split()
+        fields = load_json_data(
+            os.path.join(__file__.split('api')[0], "utils/fields"),
+            'company'
+        )
+        field_data = {}
+        for x, y in fields.items():
+            field_data[x] = {}
+        for k, v in arguments.items():
+            v = v.strip() if isinstance(v, str) else v
+            for item_key, val in fields.items():
+                if k in list(val.keys()):
+                    field_data[item_key][val[k]] = v
 
-        if not name:
-            return abort(400, 'Name cannot be empty!')
         try:
-            address = Address(
-                district=district,
-                postal_code=postal,
-                country=country,
-                address_line_1=address_line_1,
-                address_line_2=address_line_2
-                )
-            tech_person = Person(tech_person_name[0], tech_person_name[-1])
-            legal_person = Person(legal_person_name[0], legal_person_name[-1])
-            tech_contact = Contact(email=tech_person_email)
-            legal_contact = Contact(email=legal_person_email)
+            name = arguments['name']
+        except:
+            abort(400, 'Name cannot be empty!')
+        try:
+            address = Address(field_data['address_fields'])
+
+            tech_person_first_name = field_data['tech_person_fields']['first_name']
+            tech_person_last_name = field_data['tech_person_fields']['last_name']
+            tech_person_email = field_data['tech_person_fields']['tech_person_email']
+            tech_person = Person(
+                first_name=tech_person_first_name,
+                last_name=tech_person_last_name
+            )
+
+            legal_person_first_name = field_data['legal_person_fields']['first_name']
+            legal_person_last_name = field_data['legal_person_fields']['last_name']
+            legal_person_email = field_data['legal_person_fields']['legal_person_email']
+            legal_person = Person(
+                first_name=legal_person_first_name,
+                last_name=legal_person_last_name
+            )
+            tech_contact = Contact({'email': tech_person_email})
+            legal_contact = Contact({'email': legal_person_email})
 
             if not address.save_address():
                 address = Address.query.filter_by(
@@ -178,22 +188,30 @@ class CompaniesEndPoint(Resource):
                     active=True).first()
             if not tech_person.save_person():
                 tech_person = Person.query.filter_by(
-                    full_name=tech_person_name_string).first()
+                    full_name=' '.join([
+                        tech_person_first_name,
+                        tech_person_last_name
+                    ])).first()
             if not legal_person.save_person():
                 legal_person = Person.query.filter_by(
-                    full_name=legal_person_name_str).first()
+                    full_name=' '.join([
+                        legal_person_first_name,
+                        legal_person_last_name
+                    ])).first()
             if not tech_contact.save_contact():
                 tech_contact = Contact.query.filter_by(
                     email=tech_person_email).first()
             if not legal_contact.save_contact():
                 legal_contact = Contact.query.filter_by(
                     email=legal_person_email).first()
-            tech_contact_person = ContactPerson(
-                person=tech_person,
-                contact=tech_contact)
-            legal_contact_person = ContactPerson(
-                person=legal_person,
-                contact=legal_contact)
+            tech_contact_person = ContactPerson({
+                'person': tech_person,
+                'contact': tech_contact
+            })
+            legal_contact_person = ContactPerson({
+                'person': legal_person,
+                'contact': legal_contact
+            })
             if not tech_contact_person.save_contact_person():
                 tech_contact_person = ContactPerson.query.filter_by(
                     person=tech_person,
@@ -203,17 +221,17 @@ class CompaniesEndPoint(Resource):
                     person=legal_person,
                     contact=legal_contact).first()
 
-            company = Company(
-                name=name,
-                address=address,
-                legal_person=legal_contact_person,
-                tech_person=tech_contact_person
-                )
+            company = Company({
+                'name': name,
+                'address': address,
+                'legal_person': legal_contact_person,
+                'tech_person': tech_contact_person
+            })
             if company.save_company():
                 return {'message': 'Company created successfully!'}, 201
             return abort(409, message='Company already exists!')
         except Exception as e:
-            abort(400, message='Failed to create new company -> {}'.format(e))
+            abort(e.code, message='{}'.format(e.data['message']))
 
 
 @company_api.route('/<int:company_id>', endpoint='single_company')
@@ -227,6 +245,8 @@ class SingleCompanyEndpoint(Resource):
         ''' Retrieve individual company with given company_id '''
         company = Company.query.filter_by(
             id=company_id, active=True).first()
+        if not company:
+            abort(404, message='No company found with specified ID')
         data = {}
         # make company response an array for consistency since
         # first() returns object
@@ -255,27 +275,27 @@ class SingleCompanyEndpoint(Resource):
             order_by(desc(Typeapproval.date_created))
         data['typeapproval'] = typeapproval.all()
         return data, 200
-        abort(404, message='No company found with specified ID')
 
     # @company_api.header('x-access-token', 'Access Token', required=True)
     @company_api.response(200, 'Successfully Updated Company')
     @company_api.response(400, 'Company with id {} not found or not yours.')
     @company_api.marshal_with(company_fields)
-    def put(self, company_id):
+    def patch(self, company_id):
         ''' Update company with given company_id '''
         arguments = request.get_json(force=True)
-        name = arguments.get('name').strip()
         company = Company.query.filter_by(
             id=company_id, active=True).first()
-        if company:
-            if name:
-                company.name = name
-            company.save()
-            return company, 200
-        else:
+        if not company:
             abort(
                 404,
                 message='Company with id {} not found'.format(company_id))
+        try:
+            company = updateObject(company, arguments)
+            company.save()
+            return company, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))
+        
 
     # @company_api.header('x-access-token', 'Access Token', required=True)
     # @auth.login_required
@@ -285,14 +305,13 @@ class SingleCompanyEndpoint(Resource):
         ''' Delete company with company_id as given '''
         company = Company.query.filter_by(
             id=company_id, active=True).first()
-        if company:
-            if company.delete_company():
-                response = {
-                    'message': 'Company with id {} deleted.'.format(company_id)
-                }
-            return response, 200
-        else:
+        if not company:
             abort(
                 404,
                 message='Company with id {} not found.'.format(company_id)
             )
+        if company.delete_company():
+            response = {
+                'message': 'Company with id {} deleted.'.format(company_id)
+            }
+        return response, 200

@@ -2,6 +2,8 @@ from re import search
 from flask import g, request
 from flask_httpauth import HTTPTokenAuth
 from app.models.user import User
+import os
+import json
 
 auth = HTTPTokenAuth(scheme='Token')
 
@@ -20,3 +22,19 @@ def verify_token(token=None):
         g.user = User.query.filter_by(id=user_id).first()
         return True
     return False
+
+def load_json_data(file_path, file_name):
+    """
+        this function loads JSON blobs from files on the path
+    """
+    # TODO create a read-safe method
+    with open(os.path.join(file_path, "%s.json" % file_name), "r") as data:
+        json_data = json.load(data)
+    return json_data
+
+def updateObject(obj, args):
+    ''' update object with given args '''
+    for k, v in args.items():
+        v = (v.strip() if isinstance(v, str) else v) or None
+        setattr(obj, k, v)
+    return obj

@@ -7,7 +7,7 @@ from app.models.employee import Employee
 from app.models.uniqueId import UniqueId
 from app.models.resource import ResourceMeta
 from app.models.typeapproval import Typeapproval
-from app.utils.utilities import auth
+from app.utils.utilities import auth, updateObject
 from instance.config import Config
 from datetime import datetime
 
@@ -81,7 +81,7 @@ class TypeapprovalEndPoint(Resource):
             typeapproval_records = typeapproval
 
             if search_term:
-                typeapproval_records = typeapproval_data.filter(
+                typeapproval_records = typeapproval.filter(
                     Typeapproval.ta_unique_id.ilike('%'+search_term+'%')
                 )
 
@@ -143,10 +143,11 @@ class TypeapprovalEndPoint(Resource):
         try:
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
             if not report:
-                report = ResourceMeta(
-                    version=1,
-                    name=report_url.split('/')[-1],
-                    location=report_url.split('/')[:-1])
+                report = ResourceMeta({
+                    'version':1,
+                    'name':report_url.split('/')[-1],
+                    'location':report_url.split('/')[:-1]
+                })
             if not applicant_id:
                 return abort(400, message='Applicant needed to process data')
             applicant = Company.query.filter_by(
@@ -155,20 +156,20 @@ class TypeapprovalEndPoint(Resource):
             assessed_by = Employee.query.filter_by(id=assessed_by_id).first()
             ta_certificate = ResourceMeta.query.filter_by(
                 id=ta_certificate_id).first()
-            typeapproval = Typeapproval(
-                ta_unique_id=ta_unique_id,
-                status_approved=status_approved,
-                equipment_category=equipment_category,
-                equipment_name=equipment_name,
-                equipment_model=equipment_model,
-                equipment_desc=equipment_desc,
-                applicable_standards=applicable_standards,
-                approval_rejection_date=approval_rejection_date,
-                assessed_by=assessed_by,
-                ta_certificate=ta_certificate,
-                applicant=applicant,
-                report=report
-                )
+            typeapproval = Typeapproval({
+                'ta_unique_id':ta_unique_id,
+                'status_approved':status_approved,
+                'equipment_category':equipment_category,
+                'equipment_name':equipment_name,
+                'equipment_model':equipment_model,
+                'equipment_desc':equipment_desc,
+                'applicable_standards':applicable_standards,
+                'approval_rejection_date':approval_rejection_date,
+                'assessed_by':assessed_by,
+                'ta_certificate':ta_certificate,
+                'applicant':applicant,
+                'report':report
+            })
             if typeapproval.save_typeapproval():
                 return {
                         'message': 'Typeapproval record created successfully!'
@@ -203,22 +204,22 @@ class SingleTypeapprovalEndpoint(Resource):
         400,
         'Typeapproval with id {} not found or not yours.')
     @typeapproval_api.marshal_with(typeapproval_fields)
-    def put(self, typeapproval_id):
+    def patch(self, typeapproval_id):
         ''' Update typeapproval with given typeapproval_id '''
         arguments = request.get_json(force=True)
-        name = arguments.get('name').strip()
         typeapproval = Typeapproval.query.filter_by(
             id=typeapproval_id, active=True).first()
-        if typeapproval:
-            if name:
-                typeapproval.name = name
-            typeapproval.save()
-            return typeapproval, 200
-        else:
+        if not typeapproval:
             abort(
                 404,
                 message='Typeapproval with id {} not found'.format(
                     typeapproval_id))
+        try:
+            typeapproval = updateObject(typeapproval, arguments)
+            typeapproval.save()
+            return typeapproval, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))
 
     @typeapproval_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
