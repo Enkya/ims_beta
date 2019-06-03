@@ -2,6 +2,8 @@ from re import search
 from flask import g, request
 from flask_httpauth import HTTPTokenAuth
 from app.models.user import User
+from datetime import datetime
+from .constants import DATEFORMAT
 import os
 import json
 
@@ -32,9 +34,24 @@ def load_json_data(file_path, file_name):
         json_data = json.load(data)
     return json_data
 
-def updateObject(obj, args):
+def updateObject(obj, args, fields):
     ''' update object with given args '''
     for k, v in args.items():
-        v = (v.strip() if isinstance(v, str) else v) or None
-        setattr(obj, k, v)
+        v = formatType(v)
+        setattr(obj, fields[k], v)
     return obj
+
+def formatType(val):
+    if not isinstance(val, str):
+        return val
+    val.strip()
+    try:
+        return int(val)
+    except:
+        pass
+    try:
+        return datetime.strptime(
+            val, DATEFORMAT
+        )
+    except:
+        return val
