@@ -7,10 +7,9 @@ from app.models.employee import Employee
 from app.models.uniqueId import UniqueId
 from app.models.resource import ResourceMeta
 from app.models.typeapproval import Typeapproval
-from app.utils.utilities import auth, updateObject
+from app.utils.utilities import auth, load_json_data, updateObject, formatType
 from instance.config import Config
 from datetime import datetime
-
 
 typeapproval_api = Namespace(
     'typeapproval', description='A typeapproval creation namespace')
@@ -57,6 +56,11 @@ typeapproval_fields = typeapproval_api.model(
     }
 )
 
+import os
+fields = load_json_data(
+    os.path.join(__file__.split('api')[0], "utils/fields"),
+    'typeapproval'
+)
 
 @typeapproval_api.route('', endpoint='typeapproval')
 class TypeapprovalEndPoint(Resource):
@@ -122,25 +126,17 @@ class TypeapprovalEndPoint(Resource):
     def post(self):
         ''' Create a typeapproval resource'''
         arguments = request.get_json(force=True)
-        ta_unique_id = arguments.get('taUniqueId').strip() or None
-        status_approved = arguments.get('statusApproved') or False
-        equipment_category = arguments.get('equipmentCategory').strip() or None
-        equipment_name = arguments.get('equipmentName').strip() or None
-        equipment_model = arguments.get('equipmentModel').strip() or None
-        equipment_desc = arguments.get('equipmentDesc').strip() or None
-        applicable_standards = arguments.get(
-            'applicableStandards').strip() or None
-        approval_rejection_date = arguments.get(
-            'approvalRejectionDate').strip() or None
-        approval_rejection_date = datetime.strptime(
-            approval_rejection_date, '%d-%m-%y'
-        )
-        ta_certificate_id = arguments.get('taCertificateID').strip() or None
-        assessed_by_id = arguments.get('assessedBy').strip() or None
-        applicant_id = int(arguments.get('applicant').strip()) or None
-        report_url = arguments.get('report').strip() or None
+        field_data = {}
+        for x in fields.keys():
+            field_data[x] = {}
+        for k, v in arguments.items():
+            v = formatType(v)
+            for item_key, val in fields.items():
+                if k in list(val.keys()):
+                    field_data[item_key][val[k]] = v
 
         try:
+            report_url = field_data['typeapproval_fields']['report_url']
             report = ResourceMeta.query.filter_by(full_name=report_url).first()
             if not report:
                 report = ResourceMeta({
@@ -148,28 +144,24 @@ class TypeapprovalEndPoint(Resource):
                     'name':report_url.split('/')[-1],
                     'location':report_url.split('/')[:-1]
                 })
+            field_data['typeapproval_fields']['report'] = report
+            field_data['typeapproval_fields'].pop('report_url', None)
+            applicant_id = field_data['typeapproval_fields']['applicant_id']
             if not applicant_id:
                 return abort(400, message='Applicant needed to process data')
-            applicant = Company.query.filter_by(
+            field_data['typeapproval_fields']['applicant'] = Company.query.filter_by(
                 id=applicant_id,
                 active=True).first()
-            assessed_by = Employee.query.filter_by(id=assessed_by_id).first()
-            ta_certificate = ResourceMeta.query.filter_by(
-                id=ta_certificate_id).first()
-            typeapproval = Typeapproval({
-                'ta_unique_id':ta_unique_id,
-                'status_approved':status_approved,
-                'equipment_category':equipment_category,
-                'equipment_name':equipment_name,
-                'equipment_model':equipment_model,
-                'equipment_desc':equipment_desc,
-                'applicable_standards':applicable_standards,
-                'approval_rejection_date':approval_rejection_date,
-                'assessed_by':assessed_by,
-                'ta_certificate':ta_certificate,
-                'applicant':applicant,
-                'report':report
-            })
+            field_data['typeapproval_fields'].pop('applicant_id', None)
+            field_data['typeapproval_fields']['assessed_by'] = Employee.query.filter_by(
+                id=field_data['typeapproval_fields']['assessed_by_id']
+            ).first()
+            field_data['typeapproval_fields'].pop('assessed_by_id', None)
+            field_data['typeapproval_fields']['ta_certificate_id'] = ResourceMeta.query.filter_by(
+                id=field_data['typeapproval_fields']['ta_certificate_id']
+            ).first()
+            field_data['typeapproval_fields'].pop('ta_certificate_id', None)
+            typeapproval = Typeapproval(field_data['typeapproval_fields'])
             if typeapproval.save_typeapproval():
                 return {
                         'message': 'Typeapproval record created successfully!'
@@ -215,7 +207,7 @@ class SingleTypeapprovalEndpoint(Resource):
                 message='Typeapproval with id {} not found'.format(
                     typeapproval_id))
         try:
-            typeapproval = updateObject(typeapproval, arguments)
+            typeapproval = updateObject(typeapproval, arguments, fields['typeapproval_fields'])
             typeapproval.save()
             return typeapproval, 200
         except Exception as e:
