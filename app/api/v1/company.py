@@ -15,7 +15,7 @@ from app.models.spectrum import Spectrum
 from app.models.telecom import Telecom
 from app.models.typeapproval import Typeapproval
 
-from app.utils.utilities import auth, load_json_data, updateObject
+from app.utils.utilities import auth, load_json_data, updateObject, formatType
 from instance.config import Config
 
 from .numbering import numbering_fields
@@ -85,6 +85,10 @@ single_company_fields = company_api.model(
     }
 )
 
+fields = load_json_data(
+    os.path.join(__file__.split('api')[0], "utils/fields"),
+    'company'
+)
 
 @company_api.route('', endpoint='company')
 class CompaniesEndPoint(Resource):
@@ -144,15 +148,11 @@ class CompaniesEndPoint(Resource):
     def post(self):
         ''' Create a company '''
         arguments = request.get_json(force=True)
-        fields = load_json_data(
-            os.path.join(__file__.split('api')[0], "utils/fields"),
-            'company'
-        )
         field_data = {}
-        for x, y in fields.items():
+        for x in fields.keys():
             field_data[x] = {}
         for k, v in arguments.items():
-            v = v.strip() if isinstance(v, str) else v
+            v = formatType(v)
             for item_key, val in fields.items():
                 if k in list(val.keys()):
                     field_data[item_key][val[k]] = v
@@ -290,7 +290,7 @@ class SingleCompanyEndpoint(Resource):
                 404,
                 message='Company with id {} not found'.format(company_id))
         try:
-            company = updateObject(company, arguments)
+            company = updateObject(company, arguments, fields['company_fields'])
             company.save()
             return company, 200
         except Exception as e:
