@@ -1,0 +1,9 @@
+{
+    "address_fields": {
+        "district": "district",
+        "postalCode": "postal_code",
+        "country": "country",
+        "address1": "address_line_1",
+        "address2": "address_line_2"
+    }
+}

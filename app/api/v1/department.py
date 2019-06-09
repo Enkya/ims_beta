@@ -3,7 +3,7 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.department import Department
-from app.utils.utilities import auth
+from app.utils.utilities import auth, load_json_data, updateObject, formatType
 from instance.config import Config
 
 
@@ -30,6 +30,11 @@ department_fields = department_api.model(
     }
 )
 
+import os
+fields = load_json_data(
+    os.path.join(__file__.split('api')[0], "utils/fields"),
+    'department'
+)
 
 @department_api.route('', endpoint='department')
 class DepartmentsEndPoint(Resource):
@@ -92,29 +97,24 @@ class DepartmentsEndPoint(Resource):
     def post(self):
         ''' Create an department '''
         arguments = request.get_json(force=True)
-        name = arguments.get('name').strip()
-        description = arguments.get('description').strip() or None
-        size = arguments.get('size').strip()
-        size = int(size, 10)
-        permissions = arguments.get('permissions').strip() or None
+        field_data = {}
+        for x in fields.keys():
+            field_data[x] = {}
+        for k, v in arguments.items():
+            v = formatType(v)
+            for item_key, val in fields.items():
+                if k in list(val.keys()):
+                    field_data[item_key][val[k]] = v
 
-        if not name:
+        if not field_data['department_fields']['name']:
             return abort(400, 'Name cannot be empty!')
         try:
-            department = Department(
-                name=name,
-                description=description,
-                size=size,
-                permissions=permissions
-                )
+            department = Department(field_data['department_fields'])
             if department.save_department():
                 return {'message': 'Department created successfully!'}, 201
             return abort(409, message='Department already exists!')
         except Exception as e:
-            abort(
-                400,
-                message='Failed to create new department -> {}'.format(e)
-            )
+            abort(400, message='Failed to create new department -> {}'.format(e))
 
 
 @department_api.route('/<int:department_id>', endpoint='single_department')
@@ -136,22 +136,22 @@ class SingleDepartmentEndpoint(Resource):
     @department_api.response(200, 'Successfully Updated Department')
     @department_api.response(400, 'Department with id {} not found.')
     @department_api.marshal_with(department_fields)
-    def put(self, department_id):
+    def patch(self, department_id):
         ''' Update department with given department_id '''
         arguments = request.get_json(force=True)
-        permissions = arguments.get('permissions').strip()
         department = Department.query.filter_by(
             id=department_id, active=True).first()
-        if department:
-            if permissions:
-                department.permissions = permissions
-            department.save()
-            return department, 200
-        else:
+        if not department:
             abort(
                 404,
                 message='Department with id {} not found'.format(department_id)
             )
+        try:
+            department = updateObject(department, arguments, fields['department_fields'])
+            department.save()
+            return department, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))
 
     # @department_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required

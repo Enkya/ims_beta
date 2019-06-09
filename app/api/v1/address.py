@@ -3,7 +3,7 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.address import Address
-from app.utils.utilities import auth
+from app.utils.utilities import auth, formatType, load_json_data, updateObject
 from instance.config import Config
 
 
@@ -31,6 +31,11 @@ address_fields = address_api.model(
     }
 )
 
+import os
+fields = load_json_data(
+    os.path.join(__file__.split('api')[0], "utils/fields"),
+    'address'
+)
 
 @address_api.route('', endpoint='address')
 class AddressesEndPoint(Resource):
@@ -90,22 +95,19 @@ class AddressesEndPoint(Resource):
     def post(self):
         ''' Create an address '''
         arguments = request.get_json(force=True)
-        district = arguments.get('district').strip()
-        postal = arguments.get('postal').strip() or None
-        country = arguments.get('country').strip() or None
-        address_line_1 = arguments.get('address1').strip() or None
-        address_line_2 = arguments.get('address1').strip() or None
+        field_data = {}
+        for x in fields.keys():
+            field_data[x] = {}
+        for k, v in arguments.items():
+            v = formatType(v)
+            for item_key, val in fields.items():
+                if k in list(val.keys()):
+                    field_data[item_key][val[k]] = v
 
-        if not address_line_1:
+        if not field_data['address_fields']['address_line_1']:
             return abort(400, 'Address cannot be empty!')
         try:
-            address = Address(
-                district=district,
-                postal_code=postal,
-                country=country,
-                address_line_1=address_line_1,
-                address_line_2=address_line_2
-                )
+            address = Address(field_data['address_fields'])
             if address.save_address():
                 return {'message': 'Address created successfully!'}, 201
             return abort(409, message='Address already exists!')
@@ -128,26 +130,26 @@ class SingleAddressEndpoint(Resource):
             return address, 200
         abort(404, message='No address found with specified ID')
 
-    @address_api.header('x-access-token', 'Access Token', required=True)
+    # @address_api.header('x-access-token', 'Access Token', required=True)
     @address_api.response(200, 'Successfully Updated Address')
     @address_api.response(400, 'Address with id {} not found or not yours.')
     @address_api.marshal_with(address_fields)
-    def put(self, address_id):
+    def patch(self, address_id):
         ''' Update address with given address_id '''
         arguments = request.get_json(force=True)
-        address_line_1 = arguments.get('address1').strip()
         address = Address.query.filter_by(
             id=address_id, active=True).first()
-        if address:
-            if address_line_1:
-                address.address_line_1 = address_line_1
-            address.save()
-            return address, 200
-        else:
+        if not address:
             abort(
                 404,
                 message='Address with id {} not found'.format(address_id)
             )
+        try:
+            address = updateObject(address, arguments, fields['address_fields'])
+            address.save()
+            return address, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))
 
     @address_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required
@@ -157,14 +159,16 @@ class SingleAddressEndpoint(Resource):
         ''' Delete address with address_id as given '''
         address = Address.query.filter_by(
             id=address_id, active=True).first()
-        if address:
-            if address.delete_address():
-                response = {
-                    'message': 'Address with id {} deleted.'.format(address_id)
-                }
-            return response, 200
-        else:
+        if not address:
             abort(
                 404,
                 message='Address with id {} not found.'.format(address_id)
             )
+        try:
+            address.delete_address()
+            response = {
+                'message': 'Address with id {} deleted.'.format(address_id)
+            }
+            return response, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))

@@ -3,7 +3,7 @@ from flask_restplus import abort, Resource, fields, Namespace, marshal_with
 from flask_restplus import marshal
 from sqlalchemy import desc
 from app.models.contact import Contact
-from app.utils.utilities import auth
+from app.utils.utilities import auth, load_json_data, updateObject, formatType
 from instance.config import Config
 
 
@@ -33,6 +33,11 @@ contact_fields = contact_api.model(
     }
 )
 
+import os
+fields = load_json_data(
+    os.path.join(__file__.split('api')[0], "utils/fields"),
+    'contact'
+)
 
 @contact_api.route('', endpoint='contact')
 class ContactsEndPoint(Resource):
@@ -92,22 +97,19 @@ class ContactsEndPoint(Resource):
     def post(self):
         ''' Create an contact '''
         arguments = request.get_json(force=True)
-        district = arguments.get('district').strip()
-        postal = arguments.get('postal').strip() or None
-        country = arguments.get('country').strip() or None
-        contact_line_1 = arguments.get('contact1').strip() or None
-        contact_line_2 = arguments.get('contact1').strip() or None
+        field_data = {}
+        for x in fields.keys():
+            field_data[x] = {}
+        for k, v in arguments.items():
+            v = formatType(v)
+            for item_key, val in fields.items():
+                if k in list(val.keys()):
+                    field_data[item_key][val[k]] = v
 
-        if not contact_line_1:
-            return abort(400, 'Contact cannot be empty!')
+        if not field_data['contact_fields']['tel_one']:
+            return abort(400, 'telOne cannot be empty!')
         try:
-            contact = Contact(
-                district=district,
-                postal_code=postal,
-                country=country,
-                contact_line_1=contact_line_1,
-                contact_line_2=contact_line_2
-                )
+            contact = Contact(field_data['contact_fields'])
             if contact.save_contact():
                 return {'message': 'Contact created successfully!'}, 201
             return abort(409, message='Contact already exists!')
@@ -134,22 +136,22 @@ class SingleContactEndpoint(Resource):
     @contact_api.response(200, 'Successfully Updated Contact')
     @contact_api.response(400, 'Contact with id {} not found or not yours.')
     @contact_api.marshal_with(contact_fields)
-    def put(self, contact_id):
+    def patch(self, contact_id):
         ''' Update contact with given contact_id '''
         arguments = request.get_json(force=True)
-        contact_line_1 = arguments.get('contact1').strip()
         contact = Contact.query.filter_by(
             id=contact_id, active=True).first()
-        if contact:
-            if contact_line_1:
-                contact.contact_line_1 = contact_line_1
-            contact.save()
-            return contact, 200
-        else:
+        if not contact:
             abort(
                 404,
                 message='Contact with id {} not found'.format(contact_id)
             )
+        try:
+            contact = updateObject(contact, arguments, fields['contact_fields'])
+            contact.save()
+            return contact, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))
 
     # @contact_api.header('x-access-token', 'Access Token', required=True)
     @auth.login_required

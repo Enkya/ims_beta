@@ -23,27 +23,11 @@ from .postal import postal_fields
 from .spectrum import spectrum_fields
 from .telecom import telecom_fields
 from .typeapproval import typeapproval_fields
-
-import os
-
+from .address import address_fields
 
 company_api = Namespace(
     'companies', description='A company creation namespace')
 
-address_fields = company_api.model(
-    'address',
-    {
-        'district': fields.String(required=False, attribute='district'),
-        'postal': fields.String(required=False, attribute='postal_code'),
-        'country': fields.String(required=False, attribute='country'),
-        'address_line_1': fields.String(
-            required=True,
-            attribute='address_line_1'),
-        'address_line_2': fields.String(
-            required=True,
-            attribute='address_line_2'),
-    }
-)
 
 contact_people_fields = company_api.model(
     'contact_people',
@@ -85,6 +69,7 @@ single_company_fields = company_api.model(
     }
 )
 
+import os
 fields = load_json_data(
     os.path.join(__file__.split('api')[0], "utils/fields"),
     'company'
@@ -310,8 +295,11 @@ class SingleCompanyEndpoint(Resource):
                 404,
                 message='Company with id {} not found.'.format(company_id)
             )
-        if company.delete_company():
+        try:
+            company.delete_company()
             response = {
                 'message': 'Company with id {} deleted.'.format(company_id)
             }
-        return response, 200
+            return response, 200
+        except Exception as e:
+            abort(400, message='{}'.format(e))

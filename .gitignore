@@ -12,4 +12,5 @@
 .coverage
 .env
 *.json
+!/app/**/*.json
 migrations/

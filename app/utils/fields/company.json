@@ -1,0 +1,22 @@
+{
+    "address_fields": {
+        "district": "district",
+        "postalCode": "postal_code",
+        "country": "country",
+        "address1": "address_line_1",
+        "address2": "address_line_2"
+    },
+    "tech_person_fields": {
+        "techPersonFName": "first_name",
+        "techPersonLName": "last_name",
+        "techPersonEmail": "tech_person_email"
+    },
+    "legal_person_fields": {
+        "legalPersonFName": "first_name",
+        "legalPersonLName": "last_name",
+        "legalPersonEmail": "legal_person_email"
+    },
+    "company_fields": {
+        "name": "name"
+    }
+}

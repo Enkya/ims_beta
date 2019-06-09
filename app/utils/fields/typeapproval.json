@@ -1,0 +1,16 @@
+{
+    "typeapproval_fields": {
+        "taUniqueId": "ta_unique_id",
+        "statusApproved": "status_approved",
+        "equipmentCategory": "equipment_category",
+        "equipmentName": "equipment_name",
+        "equipmentModel": "equipment_model",
+        "equipmentDesc": "equipment_desc",
+        "applicableStandards": "applicable_standards",
+        "approvalRejectionDate": "approval_rejection_date",
+        "taCertificateID": "ta_certificate_id",
+        "assessedBy": "assessed_by_id",
+        "applicant": "applicant_id",
+        "report": "report_url"
+    }
+}

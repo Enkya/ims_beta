@@ -1,0 +1,8 @@
+{
+    "department_fields": {
+        "name": "name",
+        "description": "description",
+        "size": "size",
+        "permissions": "permissions"
+    }
+}

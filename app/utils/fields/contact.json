@@ -1,0 +1,9 @@
+{
+    "contact_fields": {
+        "telOne": "tel_one",
+        "telTwo": "tel_two",
+        "email": "email",
+        "social": "social_media_handle",
+        "web": "website"
+    }
+}
